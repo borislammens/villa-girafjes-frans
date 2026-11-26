@@ -92,7 +92,7 @@ export class QuizScene extends BaseScene {
     } else {
       // items from the bag (verrekijker, spiekbriefje, koptelefoon) help with this battle question
       const wantsListening = itemBoosts.nextQuestion.has(ITEM_EFFECT.SLOW_LISTEN);
-      const helped = applyNextQuestionHelpers(wantsListening ? makeListenQuestion() : makeQuestion());
+      const helped = applyNextQuestionHelpers((wantsListening && makeListenQuestion()) || makeQuestion());
       this.#question = helped.question;
       showAnswer = helped.showAnswer;
       this.#slowListen = helped.slowListen;

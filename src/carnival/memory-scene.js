@@ -4,7 +4,7 @@ import { BaseScene } from '../scenes/base-scene.js';
 import { DIRECTION } from '../common/direction.js';
 import { WORD_FONT, drawCarnivalBackground, showEndPanel } from './carnival-ui.js';
 import { WORDS } from '../vocab/words.js';
-import { getSelectedContacts } from '../vocab/quiz.js';
+import { getActiveContacts } from '../vocab/quiz.js';
 import { speakFrench } from '../vocab/speech.js';
 
 const PAIRS = 6;
@@ -73,7 +73,7 @@ export class MemoryScene extends BaseScene {
       .setOrigin(0.5);
 
     // pick pairs with a unique French and Dutch side
-    const contacts = getSelectedContacts();
+    const contacts = getActiveContacts();
     let pool = WORDS.filter((w) => contacts.includes(w.contact));
     if (pool.length < PAIRS) pool = WORDS;
     const usedFr = new Set();

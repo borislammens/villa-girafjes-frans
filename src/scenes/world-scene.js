@@ -14,7 +14,7 @@ import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text-utils.js';
 import { NPC, NPC_MOVEMENT_PATTERN } from '../world/characters/npc.js';
 import { WorldMenu } from '../world/world-menu.js';
 import { BaseScene } from './base-scene.js';
-import { makeChatQuestion } from '../vocab/quiz.js';
+import { makeChatQuestion, setStoryMaxContact } from '../vocab/quiz.js';
 import {
   CHAPTERS,
   ENDING_MESSAGES,
@@ -25,6 +25,7 @@ import {
   THIEF_FLAGS,
   STARS_PER_CHAPTER,
   chapterTasksDone,
+  currentChapterIndex,
   nextChapterToOpen,
   nextGoalText,
   questText,
@@ -93,6 +94,8 @@ export class WorldScene extends BaseScene {
   #isProcessingNpcEvent;
   /** @type {boolean} */
   #isInFrenchChat = false;
+  /** @type {Set<string> | undefined} flags when the conversation started, so a flag won in a chat does not open the next lines at once */
+  #npcFlagsAtStart;
   /** @type {any} the FRENCH_CHAT event that is running now */
   #currentChatEvent;
   /** @type {number} */
@@ -994,12 +997,19 @@ export class WorldScene extends BaseScene {
     }
 
     // get the next event from the queue and process for this npc
+    if (this.#lastNpcEventHandledIndex === -1) {
+      this.#npcFlagsAtStart = dataManager.getFlags();
+    }
     this.#lastNpcEventHandledIndex += 1;
     const eventToHandle = this.#npcPlayerIsInteractingWith.events[this.#lastNpcEventHandledIndex];
     const eventType = eventToHandle.type;
 
     // check to see if this event should be handled based on story flags
-    const eventRequirementsMet = this.#requirementsMet(eventToHandle.requires, this.#npcPlayerIsInteractingWith.id);
+    const eventRequirementsMet = this.#requirementsMet(
+      eventToHandle.requires,
+      this.#npcPlayerIsInteractingWith.id,
+      this.#npcFlagsAtStart
+    );
     if (!eventRequirementsMet) {
       // jump to next event
       this.#handleNpcInteraction();
@@ -1576,10 +1586,11 @@ export class WorldScene extends BaseScene {
   /**
    * @param {string[]} requires flags; "!FLAG" means the flag must be missing
    * @param {number} [npcId]
+   * @param {Set<string>} [flagsToUse] defaults to the flags of now
    * @returns {boolean}
    */
-  #requirementsMet(requires, npcId) {
-    const flags = dataManager.getFlags();
+  #requirementsMet(requires, npcId, flagsToUse) {
+    const flags = flagsToUse || dataManager.getFlags();
     return (requires || []).every((flag) => {
       if (flag === BATTLE_FLAG.TRAINER_DEFEATED) {
         return dataManager.getDefeatedNpcs().has(npcId);
@@ -1620,6 +1631,9 @@ export class WorldScene extends BaseScene {
       if (defeated.has(Number(id)) && !dataManager.getFlags().has(flag)) dataManager.addFlag(flag);
     });
     const flags = dataManager.getFlags();
+    // questions follow the story: chapter 1 only asks Contact 1, and so on
+    const chapter = currentChapterIndex(flags);
+    setStoryMaxContact(chapter < 0 ? 1 : chapter + 1);
     const chapterStars = getChapterStars();
     const hud = /** @type {any} */ (this.scene.get(SCENE_KEYS.STORY_HUD_SCENE));
     if (hud && hud.setText) hud.setText(questText(flags, chapterStars));

@@ -46,6 +46,24 @@ export function getSelectedContacts() {
   return [1, 2, 3, 4];
 }
 
+/** highest Contact the story has reached (chapter 1 = Contact 1, ...); 4 when the story is finished */
+let storyMaxContact = 4;
+
+/** @param {number} n */
+export function setStoryMaxContact(n) {
+  storyMaxContact = Math.max(1, Math.min(4, n));
+}
+
+/**
+ * The Contacts used for questions now: the chosen ones, but never beyond the chapter of the story.
+ * @returns {number[]}
+ */
+export function getActiveContacts() {
+  const chosen = getSelectedContacts().filter((c) => c <= storyMaxContact);
+  if (chosen.length > 0) return chosen;
+  return [1, 2, 3, 4].filter((c) => c <= storyMaxContact);
+}
+
 /** @param {number[]} contacts */
 export function setSelectedContacts(contacts) {
   safeSet(SELECTION_KEY, contacts);
@@ -105,7 +123,7 @@ let lastKey = '';
  * @returns {Question}
  */
 export function makeVocabQuestion(forceToFrench = false) {
-  const contacts = getSelectedContacts();
+  const contacts = getActiveContacts();
   let pool = WORDS.filter((w) => contacts.includes(w.contact));
   if (pool.length < 4) pool = WORDS;
 
@@ -164,7 +182,7 @@ const VERBS = {
 
 /** @returns {Question | undefined} */
 function makeVerbQuestion() {
-  const contacts = getSelectedContacts();
+  const contacts = getActiveContacts();
   const verbs = Object.keys(VERBS).filter((v) => contacts.includes(VERBS[v].contact));
   if (verbs.length === 0) return undefined;
   const verb = verbs[Math.floor(Math.random() * verbs.length)];
@@ -205,8 +223,8 @@ export function nouns(contacts) {
  * @returns {Question | undefined}
  */
 export function makeArticleQuestion(anyContact = false) {
-  if (!anyContact && !getSelectedContacts().includes(3)) return undefined;
-  let list = anyContact ? nouns(getSelectedContacts()) : nouns();
+  if (!anyContact && !getActiveContacts().includes(3)) return undefined;
+  let list = anyContact ? nouns(getActiveContacts()) : nouns();
   if (list.length < 3) list = nouns();
   const n = list[Math.floor(Math.random() * list.length)];
   const definite = Math.random() < 0.5;
@@ -282,7 +300,7 @@ export function makeChatQuestion(speaker, opts = {}) {
   if (opts.dialogueId) {
     pool = all.filter(({ d }) => d.id === opts.dialogueId);
   } else {
-    const contacts = opts.contact ? [opts.contact] : getSelectedContacts();
+    const contacts = opts.contact ? [opts.contact] : getActiveContacts();
     pool = all.filter(({ d }) => !d.storyOnly && contacts.includes(d.contact));
     if (pool.length === 0) pool = all.filter(({ d }) => !d.storyOnly);
     if (pool.length > 1) pool = pool.filter(({ i }) => i !== lastChat);

@@ -4,7 +4,7 @@ import { BaseScene } from './base-scene.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { WORDS } from '../vocab/words.js';
 import { addStars } from '../carnival/carnival-ui.js';
-import { getSelectedContacts } from '../vocab/quiz.js';
+import { getActiveContacts } from '../vocab/quiz.js';
 import { canListen, canSpeakFrench, cleanForSpeech, listenFrench, soundsAlike, speakFrench, stopSpeaking } from '../vocab/speech.js';
 
 const FONT = KENNEY_FUTURE_NARROW_FONT_NAME;
@@ -61,7 +61,7 @@ export class RepeatScene extends BaseScene {
   init(data) {
     super.init(data);
     this.#sceneData = data;
-    const contacts = getSelectedContacts();
+    const contacts = getActiveContacts();
     const pool = WORDS.filter((w) => contacts.includes(w.contact) && w.fr.length <= 22);
     this.#words = Phaser.Utils.Array.Shuffle([...pool]).slice(0, ROUND_LENGTH);
     this.#index = 0;
