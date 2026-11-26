@@ -1,0 +1,381 @@
+{
+  "1": {
+    "frame": 30,
+    "animationKeyPrefix": "NPC_1",
+    "events": [
+      {
+        "requires": [
+          "LOOKING_FOR_PROFESSOR"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "De professor hiernaast zocht je."
+          ]
+        }
+      },
+      {
+        "requires": [
+          "FOUND_PROFESSOR"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Rust maar even uit."
+          ]
+        }
+      },
+      {
+        "requires": [
+          "FOUND_PROFESSOR"
+        ],
+        "type": "HEAL",
+        "data": {}
+      },
+      {
+        "requires": [
+          "FOUND_PROFESSOR"
+        ],
+        "type": "SCENE_FADE_IN_AND_OUT",
+        "data": {
+          "fadeInDuration": 1000,
+          "fadeOutDuration": 1000,
+          "waitDuration": 1000
+        }
+      },
+      {
+        "requires": [
+          "FOUND_PROFESSOR"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Zo! Jij en je monsters zijn weer helemaal fit!"
+          ]
+        }
+      }
+    ]
+  },
+  "2": {
+    "frame": 20,
+    "animationKeyPrefix": "NPC_3",
+    "events": [
+      {
+        "requires": [],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Chloé"
+        }
+      },
+      {
+        "requires": [
+          "LOOKING_FOR_PROFESSOR"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Ik zag de professor net het dorp uit gaan."
+          ]
+        }
+      },
+      {
+        "requires": [
+          "FOUND_PROFESSOR"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Lees de bordjes, daar staan handige tips op!"
+          ]
+        }
+      }
+    ]
+  },
+  "3": {
+    "frame": 0,
+    "animationKeyPrefix": "NPC_1",
+    "events": [
+      {
+        "requires": [],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Lucas"
+        }
+      },
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Je kan je spel bewaren via het menu.",
+            "Druk op ENTER om het menu te openen."
+          ]
+        }
+      }
+    ]
+  },
+  "4": {
+    "frame": 190,
+    "animationKeyPrefix": "NPC_20",
+    "events": [
+      {
+        "requires": [
+          "TRAINER_NOT_DEFEATED"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Hé! Zin in een gevecht?"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "TRAINER_NOT_DEFEATED"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Jonge trainer"
+        }
+      },
+      {
+        "requires": [
+          "TRAINER_NOT_DEFEATED"
+        ],
+        "type": "BATTLE",
+        "data": {
+          "monsters": [
+            7
+          ],
+          "assetKey": "TRAINER_YOUTH_GIRL",
+          "trainerName": "Jonge trainer",
+          "trainerLostMessages": [
+            "Je hebt me verslagen!"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "TRAINER_DEFEATED"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Dat was een super gevecht!"
+          ]
+        }
+      }
+    ]
+  },
+  "5": {
+    "frame": 180,
+    "animationKeyPrefix": "NPC_19",
+    "events": [
+      {
+        "requires": [
+          "TRAINER_NOT_DEFEATED"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Hé! Zin in een gevecht?"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "TRAINER_NOT_DEFEATED"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Jonge trainer"
+        }
+      },
+      {
+        "requires": [
+          "TRAINER_NOT_DEFEATED"
+        ],
+        "type": "BATTLE",
+        "data": {
+          "monsters": [
+            6
+          ],
+          "assetKey": "TRAINER_YOUTH_BOY",
+          "trainerName": "Jonge trainer",
+          "trainerLostMessages": [
+            "Jij bent sterk!"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "TRAINER_DEFEATED"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Ik moet nog meer oefenen."
+          ]
+        }
+      }
+    ]
+  },
+  "6": {
+    "frame": 60,
+    "animationKeyPrefix": "NPC_7",
+    "events": [
+      {
+        "requires": [],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Madame Martin"
+        }
+      },
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Zorg dat je genoeg drankjes in je tas hebt."
+          ]
+        }
+      }
+    ]
+  },
+  "7": {
+    "frame": 150,
+    "animationKeyPrefix": "NPC_16",
+    "events": [
+      {
+        "requires": [],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Hugo"
+        }
+      },
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Ik zou wegblijven uit het spookbos..."
+          ]
+        }
+      }
+    ]
+  },
+  "8": {
+    "frame": 160,
+    "animationKeyPrefix": "NPC_17",
+    "events": [
+      {
+        "requires": [],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Léa"
+        }
+      },
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Laat je monsters eerst uitrusten voor je op pad gaat!"
+          ]
+        }
+      }
+    ]
+  },
+  "9": {
+    "frame": 180,
+    "animationKeyPrefix": "NPC_19",
+    "events": [
+      {
+        "requires": [
+          "TRAINER_NOT_DEFEATED"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Hé! Zin in een gevecht?"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "TRAINER_NOT_DEFEATED"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Jonge trainer"
+        }
+      },
+      {
+        "requires": [
+          "TRAINER_NOT_DEFEATED"
+        ],
+        "type": "BATTLE",
+        "data": {
+          "monsters": [
+            6,
+            7
+          ],
+          "assetKey": "TRAINER_YOUTH_BOY",
+          "trainerName": "Jonge trainer",
+          "trainerLostMessages": [
+            "I'll need to keep practicing."
+          ]
+        }
+      },
+      {
+        "requires": [
+          "TRAINER_DEFEATED"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Ik moet trainen voor we nog eens vechten!"
+          ]
+        }
+      }
+    ]
+  },
+  "10": {
+    "frame": 50,
+    "animationKeyPrefix": "NPC_6",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Rust hier maar even uit."
+          ]
+        }
+      },
+      {
+        "requires": [],
+        "type": "HEAL",
+        "data": {}
+      },
+      {
+        "requires": [],
+        "type": "SCENE_FADE_IN_AND_OUT",
+        "data": {
+          "fadeInDuration": 1000,
+          "fadeOutDuration": 1000,
+          "waitDuration": 1000
+        }
+      },
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Zo! Jij en je monsters zijn weer helemaal fit!"
+          ]
+        }
+      }
+    ]
+  }
+}

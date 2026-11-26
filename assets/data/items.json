@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "drankje",
+    "description": "Een drankje dat een monster 30 HP terug geeft.",
+    "category": "HEAL",
+    "effect": "HEAL_30"
+  },
+  {
+    "id": 2,
+    "name": "oude bal",
+    "description": "Een oude bal om wilde monsters mee te vangen.",
+    "category": "CAPTURE",
+    "effect": "CAPTURE_1"
+  }
+]
