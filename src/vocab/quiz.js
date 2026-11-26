@@ -1,5 +1,6 @@
 import { WORDS } from './words.js';
 import { DIALOGUES } from './dialogues.js';
+import { canSpeakFrench } from './speech.js';
 
 const SELECTION_KEY = 'franse-woordjes-contacts';
 const STATS_KEY = 'franse-woordjes-stats';
@@ -15,6 +16,9 @@ const STATS_KEY = 'franse-woordjes-stats';
  * @property {string} [hint] smaller help text under the word
  * @property {string} [speaker] name of who is talking (chats)
  * @property {string} [reply] what the speaker says after a right answer
+ * @property {string} [speak] French text read aloud when the question appears
+ * @property {string} [speakAfter] French text read aloud after answering
+ * @property {boolean} [listening] true for "what do you hear?" questions (word is hidden)
  */
 
 function safeGet(key) {
@@ -143,6 +147,8 @@ export function makeVocabQuestion() {
     options,
     correctIndex: options.indexOf(answer),
     key: wordKey(target),
+    speak: toFrench ? undefined : target.fr,
+    speakAfter: target.fr,
   };
 }
 
@@ -173,6 +179,7 @@ function makeVerbQuestion() {
     options,
     correctIndex: options.indexOf(answer),
     key: `verb|${verb}|${p}`,
+    speakAfter: `${pronoun}${pronoun.endsWith("'") ? '' : ' '}${answer}`,
   };
 }
 
@@ -211,6 +218,33 @@ function makeArticleQuestion() {
     options,
     correctIndex: options.indexOf(answer),
     key: `art|${definite ? 'def' : 'indef'}|${n.noun}`,
+    speakAfter: `${answer}${answer.endsWith("'") ? '' : ' '}${n.noun}`,
+  };
+}
+
+/**
+ * "Wat hoor je?": the French word is read aloud, the child picks the written French word.
+ * @returns {Question | undefined}
+ */
+function makeListenQuestion() {
+  if (!canSpeakFrench()) return undefined;
+  let q;
+  // a Dutch-to-French question has French options; keep trying until we get one
+  for (let i = 0; i < 10; i += 1) {
+    q = makeVocabQuestion();
+    if (q.speak === undefined) break;
+  }
+  if (!q || q.speak !== undefined) return undefined;
+  const answer = q.options[q.correctIndex];
+  return {
+    ...q,
+    prompt: 'Wat hoor je?',
+    word: '🔊 ?',
+    hint: '',
+    listening: true,
+    speak: answer,
+    speakAfter: undefined,
+    key: `listen|${q.key}`,
   };
 }
 
@@ -220,8 +254,9 @@ function makeArticleQuestion() {
  */
 export function makeQuestion() {
   const r = Math.random();
-  if (r < 0.15) return makeVerbQuestion() || makeVocabQuestion();
-  if (r < 0.25) return makeArticleQuestion() || makeVocabQuestion();
+  if (r < 0.15) return makeListenQuestion() || makeVocabQuestion();
+  if (r < 0.3) return makeVerbQuestion() || makeVocabQuestion();
+  if (r < 0.4) return makeArticleQuestion() || makeVocabQuestion();
   return makeVocabQuestion();
 }
 
@@ -249,5 +284,7 @@ export function makeChatQuestion(speaker) {
     options,
     correctIndex: options.indexOf(d.options[0]),
     key: `chat|${i}`,
+    speak: d.says,
+    speakAfter: `${d.options[0]} ... ${d.reply}`,
   };
 }

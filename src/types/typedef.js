@@ -134,6 +134,7 @@ export const NPC_EVENT_TYPE = Object.freeze({
   ITEM: 'ITEM',
   BATTLE: 'BATTLE',
   FRENCH_CHAT: 'FRENCH_CHAT',
+  REPEAT_GAME: 'REPEAT_GAME',
 });
 
 /**

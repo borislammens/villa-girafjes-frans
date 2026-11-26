@@ -64,7 +64,7 @@
         "requires": [],
         "type": "FRENCH_CHAT",
         "data": {
-          "name": "Chloé"
+          "name": "Héléna"
         }
       },
       {
@@ -99,7 +99,7 @@
         "requires": [],
         "type": "FRENCH_CHAT",
         "data": {
-          "name": "Lucas"
+          "name": "Adam"
         }
       },
       {
@@ -228,7 +228,7 @@
         "requires": [],
         "type": "FRENCH_CHAT",
         "data": {
-          "name": "Madame Martin"
+          "name": "Séverine"
         }
       },
       {
@@ -270,7 +270,16 @@
     "events": [
       {
         "requires": [],
-        "type": "FRENCH_CHAT",
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Salut! Ik ben Léa. Zullen we Frans spreken? Zeg me na!"
+          ]
+        }
+      },
+      {
+        "requires": [],
+        "type": "REPEAT_GAME",
         "data": {
           "name": "Léa"
         }

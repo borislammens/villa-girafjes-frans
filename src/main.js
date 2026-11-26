@@ -11,6 +11,7 @@ import { InventoryScene } from './scenes/inventory-scene.js';
 import { CutsceneScene } from './scenes/cutscene-scene.js';
 import { DialogScene } from './scenes/dialog-scene.js';
 import { QuizScene } from './scenes/quiz-scene.js';
+import { RepeatScene } from './scenes/repeat-scene.js';
 import { ContactSelectScene } from './scenes/contact-select-scene.js';
 
 const game = new Phaser.Game({
@@ -37,6 +38,7 @@ game.scene.add(SCENE_KEYS.INVENTORY_SCENE, InventoryScene);
 game.scene.add(SCENE_KEYS.CUTSCENE_SCENE, CutsceneScene);
 game.scene.add(SCENE_KEYS.DIALOG_SCENE, DialogScene);
 game.scene.add(SCENE_KEYS.QUIZ_SCENE, QuizScene);
+game.scene.add(SCENE_KEYS.REPEAT_SCENE, RepeatScene);
 game.scene.add(SCENE_KEYS.CONTACT_SELECT_SCENE, ContactSelectScene);
 game.scene.start(SCENE_KEYS.PRELOAD_SCENE);
 window.__game = game;

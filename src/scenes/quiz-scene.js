@@ -4,6 +4,7 @@ import { BaseScene } from './base-scene.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { makeQuestion, recordAnswer } from '../vocab/quiz.js';
+import { canSpeakFrench, speakFrench, stopSpeaking } from '../vocab/speech.js';
 
 /**
  * @typedef QuizSceneData
@@ -54,6 +55,10 @@ export class QuizScene extends BaseScene {
   #feedbackText;
   /** @type {Phaser.Input.Keyboard.Key[]} */
   #numberKeys;
+  /** @type {Phaser.Input.Keyboard.Key} */
+  #listenKey;
+  /** @type {Phaser.GameObjects.Container | undefined} */
+  #listenButton;
 
   constructor() {
     super({ key: SCENE_KEYS.QUIZ_SCENE });
@@ -170,7 +175,7 @@ export class QuizScene extends BaseScene {
     });
 
     this.#feedbackText = this.add
-      .text(width / 2, py + panelH - 40, 'Kies met de pijltjes en spatie, de cijfers, of klik.', {
+      .text(width / 2, py + panelH - 40, canSpeakFrench() ? 'Kies met de pijltjes en spatie, de cijfers, of klik. L = luisteren.' : 'Kies met de pijltjes en spatie, de cijfers, of klik.', {
         fontFamily: WORD_FONT,
         fontSize: '22px',
         color: '#7a6f6a',
@@ -183,7 +188,28 @@ export class QuizScene extends BaseScene {
       if (this.#answered && objects.length === 0) this.#continue();
     });
 
+    // listen button: replays the French text (only what may be heard at this moment)
+    if (canSpeakFrench()) {
+      const bx = px + panelW - 90;
+      const by = py + 40;
+      const bg = this.add
+        .rectangle(0, 0, 130, 50, 0xdbe9f6)
+        .setStrokeStyle(3, 0x2b5d9b)
+        .setInteractive({ useHandCursor: true });
+      const label = this.add
+        .text(0, 0, '🔊 Luister', { fontFamily: WORD_FONT, fontSize: '18px', color: '#2b5d9b' })
+        .setOrigin(0.5);
+      this.#listenButton = this.add.container(bx, by, [bg, label]);
+      bg.on(Phaser.Input.Events.POINTER_DOWN, () => this.#listen());
+      this.#listenButton.setVisible(Boolean(this.#question.speak));
+      if (this.#question.speak) {
+        this.time.delayedCall(350, () => this.#listen());
+      }
+    }
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => stopSpeaking());
+
     const kc = Phaser.Input.Keyboard.KeyCodes;
+    this.#listenKey = this.input.keyboard.addKey(kc.L);
     this.#numberKeys = [kc.ONE, kc.TWO, kc.THREE, kc.FOUR].map((k) => this.input.keyboard.addKey(k));
     this.#select(0);
   }
@@ -191,6 +217,7 @@ export class QuizScene extends BaseScene {
   update() {
     super.update();
     if (this._controls.isInputLocked) return;
+    if (Phaser.Input.Keyboard.JustDown(this.#listenKey)) this.#listen();
 
     if (this.#answered) {
       if (this._controls.wasSpaceKeyPressed() || this._controls.wasEnterKeyPressed()) this.#continue();
@@ -250,10 +277,22 @@ export class QuizScene extends BaseScene {
         .setText(`Oei! Het juiste antwoord is: ${correctAnswer}. Druk op spatie of klik.`)
         .setColor('#c62828');
     }
+    if (this.#question.speakAfter) {
+      this.#listenButton?.setVisible(true);
+      this.time.delayedCall(200, () => this.#listen());
+    } else if (this.#question.listening) {
+      // let the child hear the word once more now the answer is shown
+      this.time.delayedCall(200, () => this.#listen());
+    }
     // short pause so a double press does not skip the feedback
     this.time.delayedCall(500, () => {
       this.#canContinue = true;
     });
+  }
+
+  #listen() {
+    const text = this.#answered ? this.#question.speakAfter || this.#question.speak : this.#question.speak;
+    if (text) speakFrench(text);
   }
 
   #praise() {

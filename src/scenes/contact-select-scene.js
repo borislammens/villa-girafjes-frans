@@ -19,6 +19,8 @@ export class ContactSelectScene extends BaseScene {
   #rows;
   /** @type {Phaser.GameObjects.Rectangle} */
   #startBg;
+  /** @type {Phaser.GameObjects.Rectangle} */
+  #repeatBg;
   /** @type {Phaser.GameObjects.Text} */
   #hint;
   /** @type {boolean} */
@@ -67,11 +69,18 @@ export class ContactSelectScene extends BaseScene {
     });
 
     this.#startBg = this.add
-      .rectangle(width / 2, 470, 300, 70, 0x8fdc8f)
+      .rectangle(width / 2 - 160, 470, 280, 70, 0x8fdc8f)
       .setStrokeStyle(4, 0x2e7d32)
       .setInteractive({ useHandCursor: true });
-    this.add.text(width / 2, 470, 'Start!', { fontFamily: FONT, fontSize: '36px', color: '#1b5e20' }).setOrigin(0.5);
+    this.add.text(width / 2 - 160, 470, 'Start!', { fontFamily: FONT, fontSize: '36px', color: '#1b5e20' }).setOrigin(0.5);
     this.#startBg.on(Phaser.Input.Events.POINTER_DOWN, () => this.#start());
+
+    this.#repeatBg = this.add
+      .rectangle(width / 2 + 160, 470, 280, 70, 0xdbe9f6)
+      .setStrokeStyle(4, 0x2b5d9b)
+      .setInteractive({ useHandCursor: true });
+    this.add.text(width / 2 + 160, 470, 'Zeg me na!', { fontFamily: FONT, fontSize: '30px', color: '#2b5d9b' }).setOrigin(0.5);
+    this.#repeatBg.on(Phaser.Input.Events.POINTER_DOWN, () => this.#startRepeat());
 
     this.#hint = this.add
       .text(width / 2, 532, 'Klik op een Contact, of gebruik de pijltjes en spatie.', {
@@ -89,12 +98,15 @@ export class ContactSelectScene extends BaseScene {
     if (this._controls.isInputLocked || this.#leaving) return;
     if (this._controls.wasSpaceKeyPressed() || this._controls.wasEnterKeyPressed()) {
       if (this.#cursor === 4) this.#start();
+      else if (this.#cursor === 5) this.#startRepeat();
       else this.#toggle(this.#cursor + 1);
       return;
     }
     const dir = this._controls.getDirectionKeyJustPressed();
-    if (dir === DIRECTION.UP) this.#cursor = Math.max(0, this.#cursor - 1);
-    if (dir === DIRECTION.DOWN) this.#cursor = Math.min(4, this.#cursor + 1);
+    if (dir === DIRECTION.UP) this.#cursor = this.#cursor === 5 ? 3 : Math.max(0, this.#cursor - 1);
+    if (dir === DIRECTION.DOWN && this.#cursor < 4) this.#cursor += 1;
+    if (dir === DIRECTION.RIGHT && this.#cursor === 4) this.#cursor = 5;
+    if (dir === DIRECTION.LEFT && this.#cursor === 5) this.#cursor = 4;
     if (dir !== DIRECTION.NONE) this.#refresh();
   }
 
@@ -113,6 +125,16 @@ export class ContactSelectScene extends BaseScene {
       row.bg.setStrokeStyle(this.#cursor === i ? 6 : 4, this.#cursor === i ? 0xe0a800 : 0x6d9aa8);
     });
     this.#startBg.setStrokeStyle(this.#cursor === 4 ? 6 : 4, this.#cursor === 4 ? 0xe0a800 : 0x2e7d32);
+    this.#repeatBg.setStrokeStyle(this.#cursor === 5 ? 6 : 4, this.#cursor === 5 ? 0xe0a800 : 0x2b5d9b);
+  }
+
+  #startRepeat() {
+    if (this.#chosen.size === 0) {
+      this.#hint.setText('Kies minstens één Contact!').setColor('#c62828');
+      return;
+    }
+    setSelectedContacts([...this.#chosen].sort());
+    this.scene.start(SCENE_KEYS.REPEAT_SCENE, { previousSceneName: SCENE_KEYS.CONTACT_SELECT_SCENE });
   }
 
   #start() {

@@ -7,7 +7,9 @@ Je wandelt rond met je monster. In een gevecht val je pas aan als je een vraag j
 - **Woordjes**: Nederlands naar Frans en Frans naar Nederlands, altijd 4 keuzes.
 - **Werkwoorden**: aller (Contact 2), être (Contact 3), avoir (Contact 4).
 - **Lidwoorden**: le, la, l', un, une (Contact 3).
-- **Gesprekjes**: de mensen in het dorp spreken je aan in het Frans en jij kiest het juiste antwoord.
+- **Gesprekjes**: de mensen in het dorp (Héléna, Adam, Séverine...) spreken je aan in het Frans, naar de dialogen uit het boek, en jij kiest het juiste antwoord.
+- **Luisteren**: de computer leest Franse woorden en zinnen voor. Soms krijg je een "Wat hoor je?"-vraag.
+- **Zeg me na**: zeg Franse woorden luidop na (knop op het startscherm, of praat met Léa). Hier kan je niets fout doen: elke poging levert sterren op.
 
 Fout antwoord? Dan valt het wilde monster aan en zie je het juiste antwoord. Woordjes die je fout had, komen vaker terug.
 
@@ -22,6 +24,7 @@ Bij de start kies je welke Contacts je wil oefenen.
 | 1 tot 4 of klikken | Antwoord kiezen in een vraag |
 | Shift | Terug |
 | Enter | Menu (bewaren) |
+| L | Luisteren (Frans voorlezen) |
 | F | Volledig scherm |
 
 ## Woordenlijst aanpassen
@@ -58,3 +61,8 @@ This project uses both assets I developed as well as other assets that have been
 | Game BG Music               | xdeviruchi       | [xdeviruchi Sound Cloud](https://soundcloud.com/xdeviruchi)                                       |
 | Sound Effects               | leohpaz          | [RPG Essentials SFX Free](https://leohpaz.itch.io/rpg-essentials-sfx-free)                        |
 
+
+## Spraak
+
+Voorlezen gebruikt de stemmen van je toestel (gratis, werkt offline). Op een Mac of iPad klinkt dat het mooist.
+"Zeg me na" gebruikt spraakherkenning van de browser als die er is (Chrome, Edge, Safari). In Chrome gaat de opname daarvoor naar Google. Zonder spraakherkenning (bv. Firefox) druk je gewoon op "Ik heb het gezegd!".
