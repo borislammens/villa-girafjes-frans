@@ -313,6 +313,9 @@ export class WorldScene extends BaseScene {
       }
     });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
+    // save automatically, so closing the window never loses progress
+    dataManager.saveData();
+    this.time.addEvent({ delay: 15000, loop: true, callback: () => dataManager.saveData() });
 
     // add audio
     playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
@@ -335,7 +338,11 @@ export class WorldScene extends BaseScene {
       return;
     }
 
-    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    // a click or tap moves dialogs forward, so the game never looks stuck for mouse players
+    const wasClicked = this._controls.wasClicked();
+    const wasSpaceKeyPressed =
+      this._controls.wasSpaceKeyPressed() ||
+      (wasClicked && (this.#dialogUi.isVisible || (this.#isProcessingCutSceneEvent && !!this.#npcPlayerIsInteractingWith)));
     const selectedDirectionHeldDown = this._controls.getDirectionKeyPressedDown();
     const selectedDirectionPressedOnce = this._controls.getDirectionKeyJustPressed();
     const isShiftKeyDown = this._controls.isShiftKeyDown();

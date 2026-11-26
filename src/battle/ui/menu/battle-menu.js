@@ -69,6 +69,8 @@ export class BattleMenu {
   #switchMonsterAttempt;
   /** @type {boolean} */
   #wasItemUsed;
+  /** @type {Phaser.GameObjects.Text | undefined} */
+  #continueHint;
   /** @type {boolean} */
   #isTrainerBattle;
 
@@ -208,6 +210,7 @@ export class BattleMenu {
    * @returns {void}
    */
   playInputCursorAnimation() {
+    this.#continueHint?.setAlpha(1);
     this.#userInputCursorPhaserImageGameObject.setPosition(
       this.#battleTextGameObjectLine1.displayWidth + this.#userInputCursorPhaserImageGameObject.displayWidth * 2.7,
       this.#userInputCursorPhaserImageGameObject.y
@@ -220,6 +223,7 @@ export class BattleMenu {
    * @returns {void}
    */
   hideInputCursor() {
+    this.#continueHint?.setAlpha(0);
     this.#userInputCursorPhaserImageGameObject.setAlpha(0);
     this.#userInputCursorPhaserTween.pause();
   }
@@ -757,6 +761,16 @@ export class BattleMenu {
    * @returns {void}
    */
   #createPlayerInputCursor() {
+    // tells the child how to go on when a message waits for input
+    this.#continueHint = this.#scene.add
+      .text(this.#scene.scale.width - 20, this.#scene.scale.height - 12, 'Druk op spatie of klik ▶', {
+        fontFamily: 'Verdana, Arial, sans-serif',
+        fontSize: '16px',
+        color: '#7a6f6a',
+      })
+      .setOrigin(1, 1)
+      .setDepth(10)
+      .setAlpha(0);
     this.#userInputCursorPhaserImageGameObject = this.#scene.add.image(0, 0, UI_ASSET_KEYS.CURSOR);
     this.#userInputCursorPhaserImageGameObject.setAngle(90).setScale(2.5, 1.25);
     this.#userInputCursorPhaserImageGameObject.setAlpha(0);

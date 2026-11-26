@@ -129,6 +129,12 @@ export class TitleScene extends BaseScene {
       targets: this.#mainMenuCursorPhaserImageGameObject,
     });
 
+    // with a saved game, start on "Verder spelen" so a new game is never started by accident
+    if (this.#isContinueButtonEnabled) {
+      this.#selectedMenuOption = MAIN_MENU_OPTIONS.CONTINUE;
+      this.#mainMenuCursorPhaserImageGameObject.setY(91);
+    }
+
     // add in social links
     if (SHOW_SOCIAL_LINKS) {
       this.#addInSocialLinks();

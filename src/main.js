@@ -42,3 +42,14 @@ game.scene.add(SCENE_KEYS.REPEAT_SCENE, RepeatScene);
 game.scene.add(SCENE_KEYS.CONTACT_SELECT_SCENE, ContactSelectScene);
 game.scene.start(SCENE_KEYS.PRELOAD_SCENE);
 window.__game = game;
+
+// save when the window is closed or hidden (tab switch, closing a laptop, ...)
+import('./utils/data-manager.js').then(({ dataManager, DATA_MANAGER_STORE_KEYS }) => {
+  const saveIfPlaying = () => {
+    if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED)) dataManager.saveData();
+  };
+  window.addEventListener('pagehide', saveIfPlaying);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveIfPlaying();
+  });
+});

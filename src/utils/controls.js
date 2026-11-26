@@ -12,6 +12,8 @@ export class Controls {
   #enterKey;
   /** @type {Phaser.Input.Keyboard.Key | undefined} */
   #fKey;
+  /** @type {boolean} */
+  #clicked;
 
   /**
    * @param {Phaser.Scene} scene the Phaser 3 Scene the cursor keys will be created in
@@ -22,6 +24,21 @@ export class Controls {
     this.#enterKey = this.#scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     this.#fKey = this.#scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.#lockPlayerInput = false;
+    this.#clicked = false;
+    // a click or tap anywhere can be used as "next" by scenes that ask for it
+    this.#scene.input.on(Phaser.Input.Events.POINTER_DOWN, () => {
+      this.#clicked = true;
+    });
+  }
+
+  /**
+   * Returns true once after the player clicked or tapped the game.
+   * @returns {boolean}
+   */
+  wasClicked() {
+    const clicked = this.#clicked;
+    this.#clicked = false;
+    return clicked;
   }
 
   /** @type {boolean} */

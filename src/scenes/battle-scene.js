@@ -220,7 +220,21 @@ export class BattleScene extends BaseScene {
       return;
     }
 
-    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
+    // a click or tap also moves battle messages forward
+    const wasClicked = this._controls.wasClicked();
+    const isWaitingForMessage = [
+      BATTLE_STATES.PRE_BATTLE_INFO,
+      BATTLE_STATES.PRE_BATTLE_INFO_NPC,
+      BATTLE_STATES.POST_ATTACK_CHECK,
+      BATTLE_STATES.GAIN_EXPERIENCE,
+      BATTLE_STATES.SWITCH_MONSTER,
+      BATTLE_STATES.NPC_SWITCH_MONSTER,
+      BATTLE_STATES.CAPTURE_ITEM_USED,
+      BATTLE_STATES.FLEE_ATTEMPT,
+    ].includes(this.#battleStateMachine.currentStateName) ||
+      // "you used an item" message, shown while still in the player input state
+      (this.#battleStateMachine.currentStateName === BATTLE_STATES.PLAYER_INPUT && this.#battleMenu.wasItemUsed);
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed() || (wasClicked && isWaitingForMessage);
     // limit input based on the current battle state we are in
     // if we are not in the right battle state, return early and do not process input
     if (
