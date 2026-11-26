@@ -122,3 +122,16 @@ export const AUDIO_ASSET_KEYS = Object.freeze({
   CLAW: 'CLAW',
   ICE: 'ICE',
 });
+
+/** pixel art made for Villa De Girafjes (tools/make_villa_art.py) */
+export const VILLA_ASSET_KEYS = Object.freeze({
+  SECRET_HOUSE: 'VILLA_SECRET_HOUSE',
+  ITEMS: 'VILLA_ITEMS',
+  KERMIS_BACKGROUND: 'VILLA_KERMIS_BACKGROUND',
+  STALLS: 'VILLA_STALLS',
+  CANS: 'VILLA_CANS',
+  DUCK: 'VILLA_DUCK',
+  CARDS: 'VILLA_CARDS',
+  WATER: 'VILLA_WATER',
+  CLASSROOM: 'VILLA_CLASSROOM',
+});

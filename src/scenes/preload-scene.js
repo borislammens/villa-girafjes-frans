@@ -15,6 +15,7 @@ import {
   AUDIO_ASSET_KEYS,
   BUILDING_ASSET_KEYS,
   EXP_BAR_ASSET_KEYS,
+  VILLA_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
@@ -139,6 +140,18 @@ export class PreloadScene extends BaseScene {
     this.load.addFile(new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME]));
 
     // load attack assets
+    // pixel art made for Villa De Girafjes
+    const villa = 'assets/images/villa';
+    this.load.image(VILLA_ASSET_KEYS.SECRET_HOUSE, `${villa}/secret-house.png`);
+    this.load.spritesheet(VILLA_ASSET_KEYS.ITEMS, `${villa}/items.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.image(VILLA_ASSET_KEYS.KERMIS_BACKGROUND, `${villa}/kermis-bg.png`);
+    this.load.spritesheet(VILLA_ASSET_KEYS.STALLS, `${villa}/stalls.png`, { frameWidth: 240, frameHeight: 224 });
+    this.load.spritesheet(VILLA_ASSET_KEYS.CANS, `${villa}/cans.png`, { frameWidth: 104, frameHeight: 112 });
+    this.load.image(VILLA_ASSET_KEYS.DUCK, `${villa}/duck.png`);
+    this.load.spritesheet(VILLA_ASSET_KEYS.CARDS, `${villa}/cards.png`, { frameWidth: 200, frameHeight: 112 });
+    this.load.image(VILLA_ASSET_KEYS.WATER, `${villa}/water.png`);
+    this.load.image(VILLA_ASSET_KEYS.CLASSROOM, `${villa}/classroom.png`);
+
     this.load.spritesheet(ATTACK_ASSET_KEYS.ICE_SHARD, `${pimenAssetPath}/ice-attack/active.png`, {
       frameWidth: 32,
       frameHeight: 32,

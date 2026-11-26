@@ -3,7 +3,8 @@ import { SCENE_KEYS } from '../scenes/scene-keys.js';
 import { BaseScene } from '../scenes/base-scene.js';
 import { DIRECTION } from '../common/direction.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { WORD_FONT, drawCarnivalBackground, getStars, makeButton } from './carnival-ui.js';
+import { addPanel, drawCarnivalBackground, getStars, makeButton, panelTextStyle } from './carnival-ui.js';
+import { VILLA_ASSET_KEYS } from '../assets/asset-keys.js';
 import { speakFrench } from '../vocab/speech.js';
 
 /**
@@ -13,9 +14,9 @@ import { speakFrench } from '../vocab/speech.js';
  */
 
 const STALLS = [
-  { key: 'CARNIVAL_CANS_SCENE', emoji: '🥫', title: 'Blikken gooien', text: 'Gooi naar het juiste Franse woord', color: 0xe94b5a },
-  { key: 'CARNIVAL_MEMORY_SCENE', emoji: '🃏', title: 'Memory', text: 'Zoek Frans en Nederlands bij elkaar', color: 0x4da3ff },
-  { key: 'CARNIVAL_DUCKS_SCENE', emoji: '🦆', title: 'Eendjes vissen', text: 'Vis het juiste lidwoord: le, la, un...', color: 0xffb300 },
+  { key: 'CARNIVAL_CANS_SCENE', title: 'Blikken gooien', text: 'Raak het juiste Franse woord', color: 0xd84840 },
+  { key: 'CARNIVAL_MEMORY_SCENE', title: 'Memory', text: 'Frans en Nederlands bij elkaar', color: 0x60a0d8 },
+  { key: 'CARNIVAL_DUCKS_SCENE', title: 'Eendjes vissen', text: 'Vis het juiste lidwoord: le, la, un...', color: 0xf0b030 },
 ];
 
 /** The kermis square: pick a stall to play a mini-game with French words. */
@@ -28,6 +29,8 @@ export class CarnivalScene extends BaseScene {
   #cursor;
   /** @type {Phaser.Input.Keyboard.Key} */
   #escKey;
+  /** @type {Phaser.GameObjects.Image[]} */
+  #stallImages;
 
   constructor() {
     super({ key: SCENE_KEYS.CARNIVAL_SCENE });
@@ -46,54 +49,45 @@ export class CarnivalScene extends BaseScene {
     const { width } = this.scale;
     drawCarnivalBackground(this);
     this.add
-      .text(width / 2, 125, 'Welkom op de kermis!', {
+      .text(width / 2, 84, 'Welkom op de kermis!', {
         fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
-        fontSize: '44px',
-        color: '#ffffff',
-        stroke: '#e94b5a',
+        fontSize: '46px',
+        color: '#ffd34d',
+        stroke: '#1b1b1b',
         strokeThickness: 8,
       })
       .setOrigin(0.5);
-    this.add
-      .text(width / 2, 172, `⭐ ${getStars()} sterren   ·   elke 10 sterren = een prijs voor je tas`, {
-        fontFamily: WORD_FONT,
-        fontSize: '20px',
-        color: '#1d3557',
-      })
-      .setOrigin(0.5);
+    addPanel(this, width / 2, 136, 560, 40, { borderWidth: 4 });
+    this.add.text(width / 2, 136, `⭐ ${getStars()} sterren   ·   elke 10 sterren = een prijs`, panelTextStyle(18)).setOrigin(0.5);
 
+    this.#stallImages = [];
     STALLS.forEach((stall, i) => {
-      const x = width / 2 + (i - 1) * 300;
-      const y = 330;
-      // stall roof
-      const g = this.add.graphics();
-      g.fillStyle(stall.color, 1);
-      g.fillTriangle(x - 135, y - 95, x + 135, y - 95, x, y - 150);
-      this.add.text(x, y - 60, stall.emoji, { fontSize: '56px' }).setOrigin(0.5);
+      const x = width / 2 + (i - 1) * 320;
+      const img = this.add.image(x, 296, VILLA_ASSET_KEYS.STALLS, i).setInteractive({ useHandCursor: true });
+      img.on(Phaser.Input.Events.POINTER_DOWN, () => this.#play(i));
+      img.on(Phaser.Input.Events.POINTER_OVER, () => this.#select(i));
+      this.#stallImages.push(img);
       const btn = makeButton(this, {
         x,
-        y: y + 50,
-        w: 260,
-        h: 150,
-        label: `${stall.title}\n\n${stall.text}`,
-        fontSize: '20px',
-        fill: 0xfdf6e3,
-        stroke: stall.color,
+        y: 452,
+        w: 290,
+        h: 74,
+        label: `${stall.title}\n${stall.text}`,
+        fontSize: '17px',
         onClick: () => this.#play(i),
       });
+      btn.text.setLineSpacing(4);
       btn.zone.on(Phaser.Input.Events.POINTER_OVER, () => this.#select(i));
       this.#buttons.push(btn);
     });
 
     const back = makeButton(this, {
       x: width / 2,
-      y: 530,
-      w: 300,
-      h: 54,
-      label: '🏡 Terug naar het dorp',
-      fontSize: '20px',
-      fill: 0xdbe9f6,
-      stroke: 0x2b5d9b,
+      y: 537,
+      w: 320,
+      h: 50,
+      label: 'Terug naar het dorp',
+      fontSize: '19px',
       onClick: () => this.#leave(),
     });
     back.zone.on(Phaser.Input.Events.POINTER_OVER, () => this.#select(3));
@@ -127,6 +121,11 @@ export class CarnivalScene extends BaseScene {
   #select(i) {
     this.#cursor = i;
     this.#buttons.forEach((b, idx) => b.highlight(idx === i));
+    this.#stallImages.forEach((img, idx) => {
+      this.tweens.killTweensOf(img);
+      img.setY(296);
+      if (idx === i) this.tweens.add({ targets: img, y: 288, duration: 260, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    });
   }
 
   /** @param {number} i */

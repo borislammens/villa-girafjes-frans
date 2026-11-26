@@ -1,6 +1,9 @@
 import Phaser from '../lib/phaser.js';
 import { DataUtils } from '../utils/data-utils.js';
-import { dataManager } from '../utils/data-manager.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { MENU_COLOR } from '../common/menu/menu-config.js';
+import { VILLA_ASSET_KEYS } from '../assets/asset-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 
 export const WORD_FONT = 'Verdana, "Trebuchet MS", Arial, sans-serif';
 export const STARS_KEY = 'franse-woordjes-sterren';
@@ -114,30 +117,87 @@ export function addStars(scene, amount) {
   return { total, prizes };
 }
 
+/** gold border of the selected button, like the highlight in the rest of the game */
+export const HIGHLIGHT_COLOR = 0xffd34d;
+
 /**
- * A simple rounded button that works with mouse and touch.
+ * The colours of the menus in the game (the player can change them in OPTIES).
+ * @returns {{main: number, border: number}}
+ */
+export function menuColors() {
+  const chosen = dataManager.store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR);
+  return MENU_COLOR[(chosen ?? 0) + 1] || MENU_COLOR[1];
+}
+
+/**
+ * Draws a panel in the style of the game menus: dark fill, thick light border, square pixel corners.
+ * @param {Phaser.GameObjects.Graphics} g
+ * @param {number} x left
+ * @param {number} y top
+ * @param {number} w
+ * @param {number} h
+ * @param {{fill?: number, border?: number, borderWidth?: number, alpha?: number}} [opts]
+ */
+export function drawPanel(g, x, y, w, h, opts = {}) {
+  const colors = menuColors();
+  const bw = opts.borderWidth ?? 6;
+  g.fillStyle(0x1b1b1b, opts.alpha ?? 0.95);
+  g.fillRect(x - 2, y - 2, w + 4, h + 4);
+  g.fillStyle(opts.border ?? colors.border, 1);
+  g.fillRect(x, y, w, h);
+  g.fillStyle(opts.fill ?? colors.main, opts.alpha ?? 0.95);
+  g.fillRect(x + bw, y + bw, w - bw * 2, h - bw * 2);
+  // a light line at the top inside, like the shine on the game panels
+  g.fillStyle(0xffffff, 0.12);
+  g.fillRect(x + bw, y + bw, w - bw * 2, 4);
+}
+
+/**
+ * Adds a panel as a new game object.
  * @param {Phaser.Scene} scene
- * @param {{x: number, y: number, w: number, h: number, label: string, fill?: number, stroke?: number, color?: string, fontSize?: string, onClick: () => void}} cfg
+ * @param {number} cx centre x
+ * @param {number} cy centre y
+ * @param {number} w
+ * @param {number} h
+ * @param {{fill?: number, border?: number, borderWidth?: number, alpha?: number}} [opts]
+ * @returns {Phaser.GameObjects.Graphics}
+ */
+export function addPanel(scene, cx, cy, w, h, opts) {
+  const g = scene.add.graphics();
+  drawPanel(g, cx - w / 2, cy - h / 2, w, h, opts);
+  return g;
+}
+
+/** white text with a dark edge, used on panels and on the kermis */
+export function panelTextStyle(size = 22, font = WORD_FONT) {
+  return { fontFamily: font, fontSize: `${size}px`, color: '#ffffff', stroke: '#1b1b1b', strokeThickness: Math.max(3, Math.round(size / 6)), align: 'center' };
+}
+
+/**
+ * A button in the style of the game menus. Works with mouse and touch.
+ * @param {Phaser.Scene} scene
+ * @param {{x: number, y: number, w: number, h: number, label: string, fill?: number, stroke?: number, color?: string, fontSize?: string, font?: string, onClick: () => void}} cfg
+ *   stroke is the border colour, fill an optional fill colour (default: the menu colour)
  */
 export function makeButton(scene, cfg) {
   const g = scene.add.graphics();
-  const draw = (fill, strokeW, stroke) => {
+  let fill = cfg.fill;
+  let on = false;
+  const draw = () => {
     g.clear();
-    g.fillStyle(fill, 1);
-    g.fillRoundedRect(cfg.x - cfg.w / 2, cfg.y - cfg.h / 2, cfg.w, cfg.h, 14);
-    g.lineStyle(strokeW, stroke, 1);
-    g.strokeRoundedRect(cfg.x - cfg.w / 2, cfg.y - cfg.h / 2, cfg.w, cfg.h, 14);
+    drawPanel(g, cfg.x - cfg.w / 2, cfg.y - cfg.h / 2, cfg.w, cfg.h, {
+      fill,
+      border: on ? HIGHLIGHT_COLOR : cfg.stroke,
+      borderWidth: on ? 7 : 5,
+    });
   };
-  const fill = cfg.fill ?? 0xffffff;
-  const stroke = cfg.stroke ?? 0x6d9aa8;
-  draw(fill, 4, stroke);
+  draw();
+  const size = parseInt(cfg.fontSize ?? '24px', 10);
   const text = scene.add
     .text(cfg.x, cfg.y, cfg.label, {
-      fontFamily: WORD_FONT,
-      fontSize: cfg.fontSize ?? '24px',
-      color: cfg.color ?? '#222222',
-      align: 'center',
-      wordWrap: { width: cfg.w - 20 },
+      ...panelTextStyle(size, cfg.font ?? WORD_FONT),
+      color: cfg.color ?? '#ffffff',
+      wordWrap: { width: cfg.w - 24 },
     })
     .setOrigin(0.5);
   const zone = scene.add.zone(cfg.x, cfg.y, cfg.w, cfg.h).setInteractive({ useHandCursor: true });
@@ -146,17 +206,15 @@ export function makeButton(scene, cfg) {
     text,
     zone,
     graphics: g,
-    /** @param {boolean} on */
-    highlight(on) {
-      draw(fill, on ? 7 : 4, on ? 0xe0a800 : stroke);
+    /** @param {boolean} value */
+    highlight(value) {
+      on = value;
+      draw();
     },
     /** @param {number} color */
     setFill(color) {
-      g.clear();
-      g.fillStyle(color, 1);
-      g.fillRoundedRect(cfg.x - cfg.w / 2, cfg.y - cfg.h / 2, cfg.w, cfg.h, 14);
-      g.lineStyle(4, stroke, 1);
-      g.strokeRoundedRect(cfg.x - cfg.w / 2, cfg.y - cfg.h / 2, cfg.w, cfg.h, 14);
+      fill = color;
+      draw();
     },
     destroy() {
       g.destroy();
@@ -167,27 +225,32 @@ export function makeButton(scene, cfg) {
 }
 
 /**
- * Colorful striped carnival background.
+ * A wooden plank in the pixel style of the village fences and signs.
+ * @param {Phaser.Scene} scene
+ * @param {number} cx
+ * @param {number} cy
+ * @param {number} w
+ * @param {number} h
+ */
+export function drawPlank(scene, cx, cy, w, h) {
+  const g = scene.add.graphics();
+  const x = cx - w / 2;
+  const y = cy - h / 2;
+  g.fillStyle(0x2d2d2d, 1).fillRect(x - 4, y - 4, w + 8, h + 8);
+  g.fillStyle(0xe8c080, 1).fillRect(x, y, w, h);
+  g.fillStyle(0xfff0c8, 1).fillRect(x, y, w, 4);
+  g.fillStyle(0x986840, 1).fillRect(x, y + h - 8, w, 8);
+  // plank joints
+  for (let px = x + 96; px < x + w - 20; px += 128) g.fillStyle(0x986840, 1).fillRect(px, y + 4, 4, h - 12);
+  return g;
+}
+
+/**
+ * The kermis square in pixel art: sky, ferris wheel, circus tent, village trees, grass and flags.
  * @param {Phaser.Scene} scene
  */
 export function drawCarnivalBackground(scene) {
-  const { width, height } = scene.scale;
-  scene.add.rectangle(0, 0, width, height, 0x8fd3ff).setOrigin(0);
-  const g = scene.add.graphics();
-  // tent stripes at the top
-  const colors = [0xe94b5a, 0xfdf6e3];
-  for (let i = 0; i < 16; i += 1) {
-    g.fillStyle(colors[i % 2], 1);
-    g.fillTriangle(i * 64, 0, i * 64 + 64, 0, i * 64 + 32, 60);
-  }
-  // grass
-  g.fillStyle(0x7cc66a, 1);
-  g.fillRect(0, height - 70, width, 70);
-  // little flags
-  for (let i = 0; i < 20; i += 1) {
-    g.fillStyle([0xffd34d, 0x4da3ff, 0xe94b5a, 0x6ad66a][i % 4], 1);
-    g.fillTriangle(i * 54 + 10, 70, i * 54 + 40, 70, i * 54 + 25, 92);
-  }
+  scene.add.image(0, 0, VILLA_ASSET_KEYS.KERMIS_BACKGROUND).setOrigin(0);
 }
 
 /**
@@ -200,19 +263,23 @@ export function drawCarnivalBackground(scene) {
 export function showEndPanel(scene, stars, title, onBack) {
   const { width, height } = scene.scale;
   const { total, prizes } = addStars(scene, stars);
-  scene.add.rectangle(0, 0, width, height, 0x000000, 0.5).setOrigin(0).setInteractive();
-  scene.add.rectangle(width / 2, height / 2, 640, 360, 0xfdf6e3).setStrokeStyle(6, 0x4d4a49);
-  scene.add.text(width / 2, height / 2 - 130, title, { fontFamily: WORD_FONT, fontSize: '36px', fontStyle: 'bold', color: '#2b5d9b' }).setOrigin(0.5);
+  scene.add.rectangle(0, 0, width, height, 0x000000, 0.45).setOrigin(0).setInteractive();
+  addPanel(scene, width / 2, height / 2, 660, 380);
   scene.add
-    .text(width / 2, height / 2 - 70, `${'⭐'.repeat(Math.min(stars, 10))}  +${stars}`, { fontFamily: WORD_FONT, fontSize: '32px', color: '#4D4A49' })
+    .text(width / 2, height / 2 - 136, title, { fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME, fontSize: '36px', color: '#ffd34d', stroke: '#1b1b1b', strokeThickness: 6 })
     .setOrigin(0.5);
+  // the stars as pixel stars (the star icon from the shop sign)
+  const shown = Math.min(stars, 10);
+  for (let i = 0; i < shown; i += 1) {
+    const star = scene.add.text(width / 2 + (i - (shown - 1) / 2) * 40, height / 2 - 76, '⭐', { fontSize: '30px' }).setOrigin(0.5).setScale(0);
+    scene.tweens.add({ targets: star, scale: 1, delay: 120 * i, duration: 250, ease: 'Back.easeOut' });
+  }
+  scene.add.text(width / 2 + (shown / 2) * 40 + 30, height / 2 - 76, `+${stars}`, panelTextStyle(28)).setOrigin(0, 0.5);
   const lines = [`Je hebt nu ${total} sterren.`];
   if (prizes.length > 0) lines.push(`🎁 Prijs! Je krijgt: ${prizes.join(', ')} (in je tas).`);
   else lines.push(`Nog ${10 - (total % 10)} sterren tot je volgende prijs.`);
-  scene.add
-    .text(width / 2, height / 2, lines.join('\n'), { fontFamily: WORD_FONT, fontSize: '22px', color: '#4D4A49', align: 'center', wordWrap: { width: 580 } })
-    .setOrigin(0.5);
-  const btn = makeButton(scene, { x: width / 2, y: height / 2 + 120, w: 300, h: 64, label: 'Terug naar de kermis', fill: 0x8fdc8f, stroke: 0x2e7d32, onClick: onBack });
+  scene.add.text(width / 2, height / 2 + 4, lines.join('\n'), { ...panelTextStyle(22), wordWrap: { width: 580 }, lineSpacing: 6 }).setOrigin(0.5);
+  const btn = makeButton(scene, { x: width / 2, y: height / 2 + 120, w: 320, h: 64, label: 'Terug naar de kermis', fontSize: '22px', onClick: onBack });
   btn.zone.setDepth(100);
   btn.highlight(true);
   return btn;

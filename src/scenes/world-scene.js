@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, VILLA_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { Player } from '../world/characters/player.js';
 import { DIRECTION } from '../common/direction.js';
@@ -20,6 +20,7 @@ import {
   ENDING_MESSAGES,
   EXTRA_NPCS,
   SECRET_HOUSE,
+  MOVED_MAP_ITEMS,
   STORY_FLAGS,
   STORY_GATES,
   THIEF_FLAGS,
@@ -856,13 +857,16 @@ export class WorldScene extends BaseScene {
         continue;
       }
 
-      // create object
+      // create object (some items were moved to make room for the secret house)
+      const moved = MOVED_MAP_ITEMS[this.#sceneData.area]?.[id];
       const item = new Item({
         scene: this,
-        position: {
-          x: tiledItem.x,
-          y: tiledItem.y - TILE_SIZE,
-        },
+        position: moved
+          ? { x: moved.x * TILE_SIZE, y: moved.y * TILE_SIZE }
+          : {
+              x: tiledItem.x,
+              y: tiledItem.y - TILE_SIZE,
+            },
         itemId,
         id,
       });
@@ -1693,7 +1697,7 @@ export class WorldScene extends BaseScene {
   /** @returns {void} */
   #createSecretHouse() {
     if (this.#sceneData.area !== SECRET_HOUSE.area || !this.#collisionLayer) return;
-    const { x, y, w, h, doorX, doorY } = SECRET_HOUSE;
+    const { x, y, w, h } = SECRET_HOUSE;
     // block the tiles of the house
     const blockTile = this.#collisionLayer.layer.data.flat().find((t) => t.index > 0);
     if (blockTile) {
@@ -1704,25 +1708,10 @@ export class WorldScene extends BaseScene {
         }
       }
     }
-    const px = x * TILE_SIZE;
-    const py = y * TILE_SIZE;
-    const g = this.add.graphics().setDepth(1);
-    // walls
-    g.fillStyle(0xf3d9a4, 1).fillRect(px + 6, py + 20, w * TILE_SIZE - 12, h * TILE_SIZE - 20);
-    g.lineStyle(4, 0x6b4f2a, 1).strokeRect(px + 6, py + 20, w * TILE_SIZE - 12, h * TILE_SIZE - 20);
-    // roof
-    g.fillStyle(0xc0392b, 1).fillTriangle(px - 10, py + 26, px + w * TILE_SIZE + 10, py + 26, px + (w * TILE_SIZE) / 2, py - 60);
-    g.lineStyle(4, 0x7b241c, 1).strokeTriangle(px - 10, py + 26, px + w * TILE_SIZE + 10, py + 26, px + (w * TILE_SIZE) / 2, py - 60);
-    // door
-    const dx = doorX * TILE_SIZE;
-    const dy = doorY * TILE_SIZE;
-    g.fillStyle(0x8b5a2b, 1).fillRect(dx + 12, dy - 14, TILE_SIZE - 24, TILE_SIZE + 14);
-    g.fillStyle(0xffd700, 1).fillCircle(dx + TILE_SIZE - 20, dy + 26, 5);
-    // windows
-    g.fillStyle(0x9fd3f2, 1).fillRect(px + 22, py + 52, 36, 30).fillRect(px + w * TILE_SIZE - 58, py + 52, 36, 30);
+    // a village house with a red roof and a golden lock (assets/images/villa/secret-house.png, 4 x 3 tiles)
     this.add
-      .text(px + (w * TILE_SIZE) / 2, py - 14, '🔒 ?', { fontFamily: 'Verdana, Arial, sans-serif', fontSize: '26px', color: '#ffffff' })
-      .setOrigin(0.5)
+      .image(x * TILE_SIZE, (y - 1) * TILE_SIZE, VILLA_ASSET_KEYS.SECRET_HOUSE)
+      .setOrigin(0)
       .setDepth(1);
   }
 
@@ -1781,18 +1770,24 @@ export class WorldScene extends BaseScene {
   /** @returns {void} */
   #playStoryEnding() {
     const cam = this.cameras.main;
-    const colors = [0xe94b5a, 0x4da3ff, 0xffb300, 0x8fdc8f, 0xc77dff];
-    for (let i = 0; i < 80; i += 1) {
+    // pixel confetti in the colours of the village (square pieces that flutter, no smooth rotation)
+    const colors = [0xd84840, 0x60a0d8, 0xf8d860, 0x78b858, 0x9868c8, 0xffffff];
+    for (let i = 0; i < 90; i += 1) {
       const c = this.add
-        .rectangle(cam.worldView.x + Phaser.Math.Between(0, cam.worldView.width), cam.worldView.y - Phaser.Math.Between(10, 400), 12, 18, colors[i % colors.length])
+        .rectangle(cam.worldView.x + Phaser.Math.Snap.To(Phaser.Math.Between(0, cam.worldView.width), 4), cam.worldView.y - Phaser.Math.Between(10, 400), 12, 12, colors[i % colors.length])
+        .setStrokeStyle(2, 0x2d2d2d)
         .setDepth(10);
+      this.tweens.add({ targets: c, scaleX: 0.25, duration: Phaser.Math.Between(180, 320), yoyo: true, repeat: -1 });
       this.tweens.add({
         targets: c,
         y: cam.worldView.bottom + 40,
-        angle: Phaser.Math.Between(-360, 360),
+        x: c.x + Phaser.Math.Between(-60, 60),
         duration: Phaser.Math.Between(2500, 4500),
         delay: Phaser.Math.Between(0, 1500),
-        onComplete: () => c.destroy(),
+        onComplete: () => {
+          this.tweens.killTweensOf(c);
+          c.destroy();
+        },
       });
     }
     playSoundFx(this, AUDIO_ASSET_KEYS.FLEE);

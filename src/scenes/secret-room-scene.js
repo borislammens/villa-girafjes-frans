@@ -2,8 +2,8 @@ import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { BaseScene } from './base-scene.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { WORD_FONT } from '../carnival/carnival-ui.js';
-import { CHARACTER_ASSET_KEYS } from '../assets/asset-keys.js';
+import { addPanel, panelTextStyle } from '../carnival/carnival-ui.js';
+import { CHARACTER_ASSET_KEYS, VILLA_ASSET_KEYS } from '../assets/asset-keys.js';
 import { speakFrench } from '../vocab/speech.js';
 
 /** Inside the secret little house: juf Annelies gives a big high five. */
@@ -27,48 +27,40 @@ export class SecretRoomScene extends BaseScene {
   create() {
     super.create();
     const { width, height } = this.scale;
-    this.add.rectangle(0, 0, width, height, 0xfff3d6).setOrigin(0).setDepth(-2);
-    // blackboard
-    this.add.rectangle(width / 2, 120, 640, 150, 0x2f5d3a).setStrokeStyle(10, 0x8b5a2b);
+    // a classroom in pixel art, with the message on the blackboard
+    this.add.image(0, 0, VILLA_ASSET_KEYS.CLASSROOM).setOrigin(0).setDepth(-2);
     this.add
-      .text(width / 2, 120, 'Bravo!\nJe suis très fière de toi!', {
-        fontFamily: WORD_FONT,
-        fontSize: '34px',
-        color: '#ffffff',
+      .text(width / 2, 112, 'Bravo!\nJe suis très fière de toi!', {
+        fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+        fontSize: '36px',
+        color: '#f4f4f4',
         align: 'center',
+        lineSpacing: 10,
       })
       .setOrigin(0.5);
 
-    const juf = this.add.sprite(width / 2 - 120, 330, CHARACTER_ASSET_KEYS.NPC, 40).setScale(9);
+    const juf = this.add.sprite(width / 2 - 120, 340, CHARACTER_ASSET_KEYS.NPC, 40).setScale(9);
     juf.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
     const hand = this.add.text(width / 2 + 60, 330, '🙌', { fontSize: '120px' }).setOrigin(0.5).setScale(0.2);
     this.tweens.add({ targets: hand, scale: 1, angle: 360, duration: 700, ease: 'Back.Out' });
     this.tweens.add({ targets: juf, y: 310, yoyo: true, repeat: 3, duration: 220 });
 
+    addPanel(this, width / 2, 494, 900, 124);
     this.add
-      .text(width / 2, 455, 'Juf Annelies: "HIGH FIVE!! 500 sterren, wat knap!\nIk ben heel erg trots op jou!"', {
-        fontFamily: WORD_FONT,
-        fontSize: '24px',
-        color: '#4d4a49',
-        align: 'center',
-      })
+      .text(width / 2, 478, 'Juf Annelies: "HIGH FIVE!! 500 sterren, wat knap!\nIk ben heel erg trots op jou!"', { ...panelTextStyle(23), lineSpacing: 6 })
       .setOrigin(0.5);
     this.add
-      .text(width / 2, 535, 'Druk op spatie of klik om terug te gaan.', {
-        fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
-        fontSize: '22px',
-        color: '#7a6f6a',
-      })
+      .text(width / 2, 534, 'Druk op spatie of klik om terug te gaan.', { ...panelTextStyle(16), color: '#ffd34d' })
       .setOrigin(0.5);
 
     // confetti
-    const colors = [0xe94b5a, 0x4da3ff, 0xffb300, 0x8fdc8f, 0xc77dff];
+    const colors = [0xd84840, 0x60a0d8, 0xf8d860, 0x78b858, 0x9868c8];
     for (let i = 0; i < 70; i += 1) {
       const c = this.add.rectangle(
         Phaser.Math.Between(0, width),
         Phaser.Math.Between(-300, -10),
-        10,
-        16,
+        12,
+        12,
         colors[i % colors.length]
       ).setDepth(-1);
       this.tweens.add({

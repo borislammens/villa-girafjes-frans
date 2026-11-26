@@ -1,11 +1,12 @@
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from './scene-keys.js';
+import { drawPanel } from '../carnival/carnival-ui.js';
 
 /** The task list in the top left corner of the world. */
 export class StoryHudScene extends Phaser.Scene {
   /** @type {Phaser.GameObjects.Text | undefined} */
   #text;
-  /** @type {Phaser.GameObjects.Rectangle | undefined} */
+  /** @type {Phaser.GameObjects.Graphics | undefined} */
   #bg;
 
   constructor() {
@@ -13,12 +14,14 @@ export class StoryHudScene extends Phaser.Scene {
   }
 
   create() {
-    this.#bg = this.add.rectangle(6, 6, 10, 10, 0xfdf6e3, 0.88).setOrigin(0).setStrokeStyle(3, 0x4d4a49);
-    this.#text = this.add.text(16, 12, '', {
+    this.#bg = this.add.graphics();
+    this.#text = this.add.text(20, 17, '', {
       fontFamily: 'Verdana, "Trebuchet MS", Arial, sans-serif',
       fontSize: '15px',
-      color: '#2b2b2b',
-      lineSpacing: 3,
+      color: '#ffffff',
+      stroke: '#1b1b1b',
+      strokeThickness: 3,
+      lineSpacing: 4,
     });
     this.setText('');
   }
@@ -30,7 +33,8 @@ export class StoryHudScene extends Phaser.Scene {
     this.#text.setText(text);
     this.#bg.setVisible(Boolean(text));
     this.#text.setVisible(Boolean(text));
-    this.#bg.setSize(this.#text.width + 22, this.#text.height + 14);
+    this.#bg.clear();
+    if (text) drawPanel(this.#bg, 6, 6, this.#text.width + 30, this.#text.height + 22, { borderWidth: 4, alpha: 0.85 });
   }
 
   /** @param {boolean} visible */

@@ -3,8 +3,8 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { BaseScene } from './base-scene.js';
 import { DIRECTION } from '../common/direction.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
-import { WORD_FONT, getStars, makeButton, spendStars } from '../carnival/carnival-ui.js';
-import { DATA_ASSET_KEYS } from '../assets/asset-keys.js';
+import { addPanel, getStars, makeButton, panelTextStyle, spendStars } from '../carnival/carnival-ui.js';
+import { BUILDING_ASSET_KEYS, DATA_ASSET_KEYS, VILLA_ASSET_KEYS } from '../assets/asset-keys.js';
 import { dataManager } from '../utils/data-manager.js';
 import { speakFrench } from '../vocab/speech.js';
 
@@ -42,73 +42,75 @@ export class ShopScene extends BaseScene {
   create() {
     super.create();
     const { width, height } = this.scale;
-    this.add.rectangle(0, 0, width, height, 0xfdf6e3).setOrigin(0);
-    // striped awning
+    // the inside of the shop from the village, a bit darker so the buttons stand out
+    this.add.rectangle(0, 0, width, height, 0x1b1b1b).setOrigin(0);
+    this.add.image(width / 2, height / 2, BUILDING_ASSET_KEYS.BUILDING_2_BACKGROUND);
+    this.add.image(width / 2, height / 2, BUILDING_ASSET_KEYS.BUILDING_2_FOREGROUND);
+    this.add.rectangle(0, 0, width, height, 0x1b1b1b, 0.45).setOrigin(0);
+    // striped awning in pixel blocks
     for (let i = 0; i < 16; i += 1) {
-      this.add.rectangle(i * 64, 0, 64, 46, i % 2 ? 0xffffff : 0x2b5d9b).setOrigin(0);
+      this.add.rectangle(i * 64, 0, 64, 28, i % 2 ? 0xffffff : 0x3060a0).setOrigin(0);
+      this.add.rectangle(i * 64 + 8, 28, 48, 8, i % 2 ? 0xffffff : 0x3060a0).setOrigin(0);
     }
+    this.add.rectangle(0, 0, width, 4, 0x2d2d2d).setOrigin(0);
+    addPanel(this, width / 2, 82, 700, 76);
     this.add
-      .text(width / 2, 74, 'Le magasin de Madame Dupont', {
+      .text(width / 2, 68, 'Le magasin de Madame Dupont', {
         fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
-        fontSize: '34px',
-        color: '#2b5d9b',
+        fontSize: '32px',
+        color: '#ffd34d',
+        stroke: '#1b1b1b',
+        strokeThickness: 6,
       })
       .setOrigin(0.5);
-    this.#starsText = this.add
-      .text(width / 2, 108, '', { fontFamily: WORD_FONT, fontSize: '20px', color: '#1d3557' })
-      .setOrigin(0.5);
+    this.#starsText = this.add.text(width / 2, 102, '', panelTextStyle(17)).setOrigin(0.5);
 
     /** @type {import('../types/typedef.js').Item[]} */
     const all = this.cache.json.get(DATA_ASSET_KEYS.ITEMS) || [];
     this.#items = all.filter((i) => i.price !== undefined);
 
-    const bw = 186;
-    const bh = 96;
-    const startX = width / 2 - ((COLS - 1) * (bw + 12)) / 2;
-    const startY = 182;
+    const bw = 188;
+    const bh = 92;
+    const startX = width / 2 - ((COLS - 1) * (bw + 10)) / 2;
+    const startY = 184;
     this.#items.forEach((item, i) => {
-      const col = i % COLS;
-      const row = Math.floor(i / COLS);
+      const x = startX + (i % COLS) * (bw + 10);
+      const y = startY + Math.floor(i / COLS) * (bh + 10);
       const btn = makeButton(this, {
-        x: startX + col * (bw + 12),
-        y: startY + row * (bh + 10),
+        x,
+        y,
         w: bw,
         h: bh,
-        label: `${item.name}\n⭐ ${item.price}`,
-        fontSize: item.name.length > 16 ? '16px' : '19px',
-        fill: item.price >= 500 ? 0xffe9a8 : 0xffffff,
+        label: '',
         onClick: () => {
           this.#select(i);
           this.#buy(i);
         },
       });
+      this.add.image(x - 54, y, VILLA_ASSET_KEYS.ITEMS, item.id - 1);
+      this.add
+        .text(x + 30, y - 12, item.name, { ...panelTextStyle(item.name.length > 12 ? 14 : 16), wordWrap: { width: 96 } })
+        .setOrigin(0.5);
+      this.add.text(x + 30, y + 24, `⭐ ${item.price}`, { ...panelTextStyle(17), color: '#ffd34d' }).setOrigin(0.5);
       btn.zone.on(Phaser.Input.Events.POINTER_OVER, () => this.#select(i));
       this.#buttons.push(btn);
     });
     const backIndex = this.#items.length;
-    const lastRowY = startY + Math.floor((this.#items.length - 1) / COLS) * (bh + 10);
     const back = makeButton(this, {
-      x: startX + (backIndex % COLS) * (bw + 12),
-      y: lastRowY,
+      x: startX + (backIndex % COLS) * (bw + 10),
+      y: startY + Math.floor(backIndex / COLS) * (bh + 10),
       w: bw,
       h: bh,
       label: 'Au revoir!\n(terug)',
-      fontSize: '19px',
-      fill: 0xdbe9f6,
-      stroke: 0x2b5d9b,
+      fontSize: '18px',
       onClick: () => this.#leave(),
     });
     back.zone.on(Phaser.Input.Events.POINTER_OVER, () => this.#select(backIndex));
     this.#buttons.push(back);
 
+    addPanel(this, width / 2, 520, 900, 70);
     this.#infoText = this.add
-      .text(width / 2, height - 52, '', {
-        fontFamily: WORD_FONT,
-        fontSize: '20px',
-        color: '#4d4a49',
-        align: 'center',
-        wordWrap: { width: width - 80 },
-      })
+      .text(width / 2, 520, '', { ...panelTextStyle(18), wordWrap: { width: 860 } })
       .setOrigin(0.5);
 
     this.#escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -146,7 +148,7 @@ export class ShopScene extends BaseScene {
     this.#cursor = i;
     this.#buttons.forEach((b, idx) => b.highlight(idx === i));
     const item = this.#items[i];
-    this.#infoText.setColor('#4d4a49');
+    this.#infoText.setColor('#ffffff');
     this.#infoText.setText(item ? item.description : 'Terug naar het dorp.');
   }
 
@@ -156,19 +158,19 @@ export class ShopScene extends BaseScene {
     if (!item) return;
     const owned = dataManager.store.get('INVENTORY').find((inv) => inv.item.id === item.id);
     if (item.keep && owned && owned.quantity > 0) {
-      this.#infoText.setColor('#7a6f6a').setText(`Je hebt al een ${item.name}. Die raakt nooit op!`);
+      this.#infoText.setColor('#dddddd').setText(`Je hebt al een ${item.name}. Die raakt nooit op!`);
       return;
     }
     if (!spendStars(item.price)) {
       this.#infoText
-        .setColor('#c62828')
+        .setColor('#ff8a80')
         .setText(`Je hebt nog ${item.price - getStars()} sterren te weinig. Verdien sterren op de kermis of met Zeg me na!`);
       return;
     }
     dataManager.addItem(item, 1);
     dataManager.saveData();
     this.#updateStars();
-    this.#infoText.setColor('#2e7d32').setText(`Merci! Je kocht: ${item.name}. Hij zit in je tas.`);
+    this.#infoText.setColor('#a5e88f').setText(`Merci! Je kocht: ${item.name}. Hij zit in je tas.`);
     speakFrench('Merci!');
   }
 

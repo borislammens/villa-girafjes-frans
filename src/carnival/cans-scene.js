@@ -2,12 +2,12 @@ import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from '../scenes/scene-keys.js';
 import { BaseScene } from '../scenes/base-scene.js';
 import { DIRECTION } from '../common/direction.js';
-import { WORD_FONT, drawCarnivalBackground, showEndPanel } from './carnival-ui.js';
+import { HIGHLIGHT_COLOR, addPanel, drawCarnivalBackground, drawPanel, drawPlank, panelTextStyle, showEndPanel } from './carnival-ui.js';
+import { BATTLE_ASSET_KEYS, VILLA_ASSET_KEYS } from '../assets/asset-keys.js';
 import { makeVocabQuestion, recordAnswer } from '../vocab/quiz.js';
 import { speakFrench } from '../vocab/speech.js';
 
 const ROUNDS = 6;
-const CAN_COLORS = [0xe94b5a, 0x4da3ff, 0x6ad66a, 0xffb300];
 
 /** Blikken gooien: a Dutch word is shown, throw the ball at the can with the right French word. */
 export class CansScene extends BaseScene {
@@ -60,25 +60,18 @@ export class CansScene extends BaseScene {
     super.create();
     const { width } = this.scale;
     drawCarnivalBackground(this);
-    // the stall counter / shelf
-    this.add.rectangle(width / 2, 330, 860, 22, 0x8d5524).setStrokeStyle(3, 0x5b3412);
-    this.add.rectangle(width / 2, 520, 900, 40, 0xb5651d).setStrokeStyle(3, 0x5b3412);
+    // the shelf with the cans and the counter in front
+    drawPlank(this, width / 2, 330, 880, 20);
+    drawPlank(this, width / 2, 522, 940, 40);
 
-    this.#promptText = this.add
-      .text(width / 2, 108, 'Gooi naar het Franse woord voor:', { fontFamily: WORD_FONT, fontSize: '22px', color: '#1d3557' })
-      .setOrigin(0.5);
+    addPanel(this, width / 2, 116, 760, 92);
+    this.#promptText = this.add.text(width / 2, 94, 'Gooi naar het Franse woord voor:', panelTextStyle(18)).setOrigin(0.5);
     this.#wordText = this.add
-      .text(width / 2, 150, '', { fontFamily: WORD_FONT, fontSize: '40px', fontStyle: 'bold', color: '#1d3557', stroke: '#ffffff', strokeThickness: 6 })
+      .text(width / 2, 132, '', { ...panelTextStyle(36), color: '#ffd34d', fontStyle: 'bold' })
       .setOrigin(0.5);
-    this.#scoreText = this.add
-      .text(width - 20, 108, '', { fontFamily: WORD_FONT, fontSize: '20px', color: '#1d3557' })
-      .setOrigin(1, 0.5);
-    this.#infoText = this.add
-      .text(width / 2, 400, '', { fontFamily: WORD_FONT, fontSize: '26px', fontStyle: 'bold', color: '#1d3557', stroke: '#ffffff', strokeThickness: 5, align: 'center' })
-      .setOrigin(0.5);
-    this.add
-      .text(width / 2, 562, 'Klik op een blik, of kies met de pijltjes / cijfers 1-4 en spatie.', { fontFamily: WORD_FONT, fontSize: '16px', color: '#1d3557' })
-      .setOrigin(0.5);
+    this.#scoreText = this.add.text(width / 2 + 366, 94, '', { ...panelTextStyle(15), align: 'right' }).setOrigin(1, 0.5);
+    this.#infoText = this.add.text(width / 2, 452, '', { ...panelTextStyle(26), fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(width / 2, 562, 'Klik op een blik, of kies met de pijltjes / cijfers 1-4 en spatie.', panelTextStyle(15)).setOrigin(0.5);
 
     const kc = Phaser.Input.Keyboard.KeyCodes;
     this.#numberKeys = [kc.ONE, kc.TWO, kc.THREE, kc.FOUR].map((k) => this.input.keyboard.addKey(k));
@@ -128,17 +121,19 @@ export class CansScene extends BaseScene {
 
     const { width } = this.scale;
     this.#question.options.forEach((option, i) => {
-      const x = width / 2 + (i - 1.5) * 210;
-      const can = this.add.container(x, 260);
-      const body = this.add.rectangle(0, 0, 170, 110, CAN_COLORS[i]).setStrokeStyle(4, 0x333333);
-      const rim = this.add.rectangle(0, -55, 170, 12, 0xcccccc).setStrokeStyle(2, 0x333333);
+      const x = width / 2 + (i - 1.5) * 220;
+      const can = this.add.container(x, 264);
+      const cans = this.add.image(0, 0, VILLA_ASSET_KEYS.CANS, i);
+      const plate = this.add.graphics();
+      drawPanel(plate, -98, 82, 196, 56, { borderWidth: 4 });
       const label = this.add
-        .text(0, 0, option, { fontFamily: WORD_FONT, fontSize: option.length > 14 ? '17px' : '22px', color: '#ffffff', fontStyle: 'bold', align: 'center', wordWrap: { width: 150 }, stroke: '#333333', strokeThickness: 3 })
+        .text(0, 110, option, { ...panelTextStyle(option.length > 14 ? 16 : 21), fontStyle: 'bold', wordWrap: { width: 176 } })
         .setOrigin(0.5);
-      const num = this.add.text(-75, 40, `${i + 1}`, { fontFamily: WORD_FONT, fontSize: '14px', color: '#ffffff' });
-      can.add([body, rim, label, num]);
-      can.setSize(170, 120);
-      can.setInteractive({ useHandCursor: true });
+      const num = this.add.text(-88, 88, `${i + 1}`, { ...panelTextStyle(12), color: '#ffd34d' });
+      can.add([cans, plate, label, num]);
+      can.setSize(200, 260);
+      // the hit area covers the cans and the word plate (local y -60 to 140)
+      can.setInteractive(new Phaser.Geom.Rectangle(0, 70, 200, 200), Phaser.Geom.Rectangle.Contains);
       can.on(Phaser.Input.Events.POINTER_DOWN, () => {
         if (!this.#busy && !this.#finished) this.#throw(i);
       });
@@ -153,7 +148,12 @@ export class CansScene extends BaseScene {
   /** @param {number} i */
   #select(i) {
     this.#cursor = i;
-    this.#cans.forEach((c, idx) => c.setScale(idx === i ? 1.08 : 1));
+    this.#cans.forEach((c, idx) => {
+      c.setScale(idx === i ? 1.08 : 1);
+      const plate = /** @type {Phaser.GameObjects.Graphics} */ (c.list[1]);
+      plate.clear();
+      drawPanel(plate, -98, 82, 196, 56, { borderWidth: idx === i ? 6 : 4, border: idx === i ? HIGHLIGHT_COLOR : undefined });
+    });
   }
 
   /** @param {number} i */
@@ -162,11 +162,12 @@ export class CansScene extends BaseScene {
     const target = this.#cans[i];
     const correct = i === this.#question.correctIndex;
     recordAnswer(this.#question.key, correct);
-    const ball = this.add.circle(this.scale.width / 2, 520, 18, 0xffffff).setStrokeStyle(3, 0x333333);
+    const ball = this.add.image(this.scale.width / 2, 520, BATTLE_ASSET_KEYS.BALL_THUMBNAIL).setScale(1.5);
+    this.tweens.add({ targets: ball, angle: 540, duration: 450 });
     this.tweens.add({
       targets: ball,
       x: target.x,
-      y: target.y,
+      y: target.y - 10,
       duration: 450,
       ease: 'Quad.easeOut',
       onComplete: () => {
@@ -174,7 +175,8 @@ export class CansScene extends BaseScene {
         if (correct) {
           this.#hits += 1;
           ball.destroy();
-          this.tweens.add({ targets: target, y: target.y + 220, angle: 80, alpha: 0, duration: 600, ease: 'Quad.easeIn' });
+          const tins = /** @type {Phaser.GameObjects.Image} */ (target.list[0]);
+          this.tweens.add({ targets: tins, y: 140, x: 60, angle: 100, alpha: 0, duration: 650, ease: 'Quad.easeIn' });
           this.#infoText.setColor('#2e7d32').setText(`Raak! 🎉 ${answer}`);
         } else {
           this.tweens.add({ targets: ball, y: 560, x: ball.x + 80, duration: 500, onComplete: () => ball.destroy() });

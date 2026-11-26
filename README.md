@@ -79,6 +79,7 @@ This project uses both assets I developed as well as other assets that have been
 | Ice Attack                  | Pimen            | [Pimen Ice Spell Effect](https://pimen.itch.io/ice-spell-effect-01)                               |
 | Slash Attack                | Pimen            | [Pimen Slash VFX](https://pimen.itch.io/battle-vfx-slashes-and-thrusts)                           |
 | NPC                         | Parabellum Games | [Retro RPG Character Pack](https://parabellum-games.itch.io/retro-rpg-character-pack)             |
+| Villa art (kermis, huisje, icoontjes) | Villa De Girafjes | `assets/images/villa/`, gemaakt met `tools/make_villa_art.py` uit de kaart van Monster Tamer (MIT) en eigen pixeltekeningen |
 | Player Character            | AxulArt          | [Small 8-direction Characters](https://axulart.itch.io/small-8-direction-characters)              |
 | Basic Plains Tileset        | AxulArt          | [AxulArt's BasicPlains Tileset Ver. 2](https://axulart.itch.io/axularts-basicplains-tileset-ver2) |
 | Beach & Caves Tileset       | AxulArt          | [AxulArt's Beach and caves tileset](https://axulart.itch.io/axularts-beach-and-caves-tileset)     |

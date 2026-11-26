@@ -1,5 +1,5 @@
 import Phaser from '../lib/phaser.js';
-import { INVENTORY_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import { INVENTORY_ASSET_KEYS, UI_ASSET_KEYS, VILLA_ASSET_KEYS } from '../assets/asset-keys.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { dataManager } from '../utils/data-manager.js';
@@ -12,6 +12,8 @@ import { ITEM_CATEGORY } from '../types/typedef.js';
 const CANCEL_TEXT_DESCRIPTION = 'Sluit je tas en ga verder op avontuur!';
 const CANNOT_USE_ITEM_TEXT = 'Dat kan je nu niet gebruiken.';
 
+/** room for the item icon in front of the name */
+const ICON_SPACE = 54;
 const INVENTORY_ITEM_POSITION = Object.freeze({
   x: 50,
   y: 14,
@@ -31,6 +33,7 @@ const INVENTORY_TEXT_STYLE = {
  * @property {Phaser.GameObjects.Text} [itemName]
  * @property {Phaser.GameObjects.Text} [quantitySign]
  * @property {Phaser.GameObjects.Text} [quantity]
+ * @property {Phaser.GameObjects.Image} [icon]
  */
 
 /**
@@ -140,11 +143,15 @@ export class InventoryScene extends BaseScene {
     // create inventory text from available items
     this.#inventory.forEach((inventoryItem, index) => {
       const itemText = this.add.text(
-        INVENTORY_ITEM_POSITION.x,
+        INVENTORY_ITEM_POSITION.x + ICON_SPACE,
         INVENTORY_ITEM_POSITION.y + index * INVENTORY_ITEM_POSITION.space,
         inventoryItem.item.name,
         INVENTORY_TEXT_STYLE
       );
+      // pixel icon of the item (assets/images/villa/items.png)
+      const icon = this.add
+        .image(INVENTORY_ITEM_POSITION.x + 20, INVENTORY_ITEM_POSITION.y + 18 + index * INVENTORY_ITEM_POSITION.space, VILLA_ASSET_KEYS.ITEMS, inventoryItem.item.id - 1)
+        .setScale(0.625);
       const qty1Text = this.add.text(620, INVENTORY_ITEM_POSITION.y + 2 + index * INVENTORY_ITEM_POSITION.space, 'x', {
         color: '#000000',
         fontSize: '30px',
@@ -155,8 +162,9 @@ export class InventoryScene extends BaseScene {
         `${inventoryItem.quantity}`,
         INVENTORY_TEXT_STYLE
       );
-      container.add([itemText, qty1Text, qty2Text]);
+      container.add([icon, itemText, qty1Text, qty2Text]);
       inventoryItem.gameObjects = {
+        icon,
         itemName: itemText,
         quantity: qty2Text,
         quantitySign: qty1Text,
@@ -408,6 +416,11 @@ export class InventoryScene extends BaseScene {
     };
     this.#inventory.forEach((inv, index) => {
       place([inv.gameObjects.itemName, inv.gameObjects.quantitySign, inv.gameObjects.quantity], index);
+      const icon = inv.gameObjects.icon;
+      if (icon) {
+        icon.setVisible(inv.gameObjects.itemName.visible);
+        icon.setY(inv.gameObjects.itemName.y + 18);
+      }
     });
     place([this.#cancelText], this.#inventory.length);
     this.#userInputCursor.setY(30 + (this.#selectedInventoryOptionIndex - top) * INVENTORY_ITEM_POSITION.space);

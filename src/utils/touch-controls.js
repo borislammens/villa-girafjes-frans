@@ -30,23 +30,24 @@ function sendKey(type, k) {
 
 function addStyle() {
   const style = document.createElement('style');
+  // same look as the menus in the game: dark panel colour, light border, square corners, Kenney font
   style.textContent = `
-    .touch-pad { position: fixed; inset: auto 0 0 0; height: 0; z-index: 30; pointer-events: none; font-family: Verdana, Arial, sans-serif; }
+    .touch-pad { position: fixed; inset: auto 0 0 0; height: 0; z-index: 30; pointer-events: none; font-family: Kenney-Future-Narrow, Verdana, Arial, sans-serif; }
     .touch-pad.hidden .touch-btn { display: none; }
     .touch-btn { position: fixed; pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none;
-      background: rgba(253, 246, 227, 0.55); border: 3px solid rgba(77, 74, 73, 0.75); color: #2b2b2b;
-      display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    .touch-btn.down-state { background: rgba(255, 224, 138, 0.85); }
-    .touch-dir { width: 62px; height: 62px; border-radius: 14px; font-size: 26px; }
+      background: rgba(50, 69, 76, 0.62); border: 4px solid rgba(109, 154, 168, 0.9); outline: 2px solid rgba(27, 27, 27, 0.6);
+      color: #ffffff; text-shadow: 2px 2px 0 #1b1b1b; display: flex; align-items: center; justify-content: center; }
+    .touch-btn.down-state { background: rgba(61, 90, 100, 0.9); border-color: #ffd34d; }
+    .touch-dir { width: 62px; height: 62px; font-size: 24px; }
     .touch-up { left: 82px; bottom: 150px; }
     .touch-down { left: 82px; bottom: 18px; }
     .touch-left { left: 16px; bottom: 84px; }
     .touch-right { left: 148px; bottom: 84px; }
-    .touch-a { right: 24px; bottom: 60px; width: 84px; height: 84px; border-radius: 50%; font-size: 30px; }
-    .touch-b { right: 124px; bottom: 24px; width: 60px; height: 60px; border-radius: 50%; font-size: 22px; }
-    .touch-menu { right: 24px; bottom: 160px; width: 84px; height: 40px; border-radius: 12px; font-size: 14px; }
-    .touch-toggle { position: fixed; right: 10px; top: 10px; z-index: 31; width: 44px; height: 44px; border-radius: 50%;
-      border: 2px solid rgba(77, 74, 73, 0.6); background: rgba(253, 246, 227, 0.7); font-size: 22px; cursor: pointer; }
+    .touch-a { right: 24px; bottom: 60px; width: 80px; height: 80px; border-radius: 50%; font-size: 32px; }
+    .touch-b { right: 124px; bottom: 24px; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; }
+    .touch-menu { right: 24px; bottom: 160px; width: 84px; height: 40px; font-size: 16px; letter-spacing: 1px; }
+    .touch-toggle { position: fixed; right: 10px; top: 10px; z-index: 31; width: 44px; height: 44px; border-radius: 0;
+      border: 3px solid rgba(109, 154, 168, 0.9); outline: 2px solid rgba(27, 27, 27, 0.6); background: rgba(50, 69, 76, 0.75); font-size: 22px; cursor: pointer; }
   `;
   document.head.appendChild(style);
 }

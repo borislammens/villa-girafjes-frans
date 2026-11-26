@@ -198,4 +198,6 @@ export const EXTRA_NPCS = [
 ];
 
 /** The secret little house in the village: only the "sleutel tot de school" opens it. */
-export const SECRET_HOUSE = Object.freeze({ area: 'main_1', x: 26, y: 78, w: 3, h: 2, doorX: 27, doorY: 79 });
+export const SECRET_HOUSE = Object.freeze({ area: 'main_1', x: 25, y: 78, w: 4, h: 2, doorX: 27, doorY: 79 });
+/** the crate that stood where the secret house is now, moved a bit to the left */
+export const MOVED_MAP_ITEMS = Object.freeze({ main_1: { 1: { x: 24, y: 80 } } });
