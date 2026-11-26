@@ -410,6 +410,14 @@ export class WorldScene extends BaseScene {
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
 
+        if (this.#menu.selectedMenuOption === 'KERMIS') {
+          this.#menu.hide();
+          this._controls.lockInput = true;
+          this.scene.launch(SCENE_KEYS.CARNIVAL_SCENE, { previousSceneName: SCENE_KEYS.WORLD_SCENE });
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+          return;
+        }
+
         if (this.#menu.selectedMenuOption === 'BAG') {
           // pause this scene and launch the inventory scene
           /** @type {import('./inventory-scene.js').InventorySceneData} */
@@ -825,7 +833,7 @@ export class WorldScene extends BaseScene {
    */
   handleSceneResume(sys, data) {
     super.handleSceneResume(sys, data);
-    if (data && (data.quizAnswered || data.repeatDone) && this.#isInFrenchChat) {
+    if (data && (data.quizAnswered || data.repeatDone || data.carnivalDone) && this.#isInFrenchChat) {
       this.#isInFrenchChat = false;
       this.#isProcessingNpcEvent = false;
       // small pause so the key press that closed the chat does not open a new one
@@ -925,6 +933,13 @@ export class WorldScene extends BaseScene {
           },
         };
         this.#startBattleScene(dataToPass);
+        break;
+      case NPC_EVENT_TYPE.CARNIVAL:
+        this.#isProcessingNpcEvent = true;
+        this.#isInFrenchChat = true;
+        this._controls.lockInput = true;
+        this.scene.launch(SCENE_KEYS.CARNIVAL_SCENE, { previousSceneName: SCENE_KEYS.WORLD_SCENE });
+        this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         break;
       case NPC_EVENT_TYPE.REPEAT_GAME:
         this.#isProcessingNpcEvent = true;

@@ -3,13 +3,13 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { BaseScene } from './base-scene.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { WORDS } from '../vocab/words.js';
+import { addStars } from '../carnival/carnival-ui.js';
 import { getSelectedContacts } from '../vocab/quiz.js';
 import { canListen, canSpeakFrench, cleanForSpeech, listenFrench, soundsAlike, speakFrench, stopSpeaking } from '../vocab/speech.js';
 
 const FONT = KENNEY_FUTURE_NARROW_FONT_NAME;
 const WORD_FONT = 'Verdana, "Trebuchet MS", Arial, sans-serif';
 const ROUND_LENGTH = 5;
-const STARS_KEY = 'franse-woordjes-sterren';
 
 /**
  * @typedef RepeatSceneData
@@ -219,17 +219,13 @@ export class RepeatScene extends BaseScene {
 
   #finish() {
     this.#state = 'FINISHED';
-    let total = 0;
-    try {
-      total = Number(localStorage.getItem(STARS_KEY) || 0) + this.#stars;
-      localStorage.setItem(STARS_KEY, String(total));
-    } catch {
-      total = this.#stars;
-    }
+    // same star counter as the kermis: every 10 stars gives a prize in your bag
+    const { total, prizes } = addStars(this, this.#stars);
     this.#wordText.setText('Bravo! 🎉');
     this.#dutchText.setText('');
     this.#progressText.setText('');
-    this.#feedbackText.setText(`Je verdiende ${this.#stars} sterren! In totaal heb je er al ${total}.`);
+    const prizeText = prizes.length > 0 ? ` 🎁 Prijs: ${prizes.join(', ')}!` : '';
+    this.#feedbackText.setText(`Je verdiende ${this.#stars} sterren! In totaal heb je er al ${total}.${prizeText}`);
     this.#mainButtonText.setText('Terug');
     speakFrench('Bravo! Très bien!');
   }

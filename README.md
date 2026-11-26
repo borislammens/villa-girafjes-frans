@@ -11,6 +11,8 @@ Je wandelt rond met je monster. In een gevecht val je pas aan als je een vraag j
 - **Luisteren**: de computer leest Franse woorden en zinnen voor. Soms krijg je een "Wat hoor je?"-vraag.
 - **Zeg me na**: zeg Franse woorden luidop na (knop op het startscherm, of praat met Léa). Hier kan je niets fout doen: elke poging levert sterren op.
 
+- **Kermis**: open de kermis via het menu (ENTER) of praat met Hugo. Drie kramen: blikken gooien naar het juiste Franse woord, memory (Frans en Nederlands koppelen) en eendjes vissen met le/la/l'/un/une. Elke 10 sterren levert een prijs op in je tas (een drankje of een bal).
+
 Fout antwoord? Dan valt het wilde monster aan en zie je het juiste antwoord. Woordjes die je fout had, komen vaker terug.
 
 Bij de start kies je welke Contacts je wil oefenen.
@@ -23,7 +25,8 @@ Bij de start kies je welke Contacts je wil oefenen.
 | Spatie | Bevestigen |
 | 1 tot 4 of klikken | Antwoord kiezen in een vraag |
 | Shift | Terug |
-| Enter | Menu (bewaren) |
+| Enter | Menu (kermis, tas, bewaren) |
+| Klik / tik | Berichten verder zetten, antwoorden kiezen |
 | L | Luisteren (Frans voorlezen) |
 | F | Volledig scherm |
 
@@ -66,3 +69,5 @@ This project uses both assets I developed as well as other assets that have been
 
 Voorlezen gebruikt de stemmen van je toestel (gratis, werkt offline). Op een Mac of iPad klinkt dat het mooist.
 "Zeg me na" gebruikt spraakherkenning van de browser als die er is (Chrome, Edge, Safari). In Chrome gaat de opname daarvoor naar Google. Zonder spraakherkenning (bv. Firefox) druk je gewoon op "Ik heb het gezegd!".
+
+Het spel bewaart automatisch (elke 15 seconden en bij het sluiten van het venster), in de browser zelf.

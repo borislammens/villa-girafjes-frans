@@ -12,6 +12,10 @@ import { CutsceneScene } from './scenes/cutscene-scene.js';
 import { DialogScene } from './scenes/dialog-scene.js';
 import { QuizScene } from './scenes/quiz-scene.js';
 import { RepeatScene } from './scenes/repeat-scene.js';
+import { CarnivalScene } from './carnival/carnival-scene.js';
+import { CansScene } from './carnival/cans-scene.js';
+import { MemoryScene } from './carnival/memory-scene.js';
+import { DucksScene } from './carnival/ducks-scene.js';
 import { ContactSelectScene } from './scenes/contact-select-scene.js';
 
 const game = new Phaser.Game({
@@ -39,6 +43,10 @@ game.scene.add(SCENE_KEYS.CUTSCENE_SCENE, CutsceneScene);
 game.scene.add(SCENE_KEYS.DIALOG_SCENE, DialogScene);
 game.scene.add(SCENE_KEYS.QUIZ_SCENE, QuizScene);
 game.scene.add(SCENE_KEYS.REPEAT_SCENE, RepeatScene);
+game.scene.add(SCENE_KEYS.CARNIVAL_SCENE, CarnivalScene);
+game.scene.add(SCENE_KEYS.CARNIVAL_CANS_SCENE, CansScene);
+game.scene.add(SCENE_KEYS.CARNIVAL_MEMORY_SCENE, MemoryScene);
+game.scene.add(SCENE_KEYS.CARNIVAL_DUCKS_SCENE, DucksScene);
 game.scene.add(SCENE_KEYS.CONTACT_SELECT_SCENE, ContactSelectScene);
 game.scene.start(SCENE_KEYS.PRELOAD_SCENE);
 window.__game = game;

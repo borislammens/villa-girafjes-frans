@@ -258,9 +258,15 @@
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Ik zou wegblijven uit het spookbos..."
+            "De kermis is open! Kom je Frans spelen? Je kan er sterren en prijzen winnen.",
+            "(Je kan de kermis ook altijd openen via het menu: druk op ENTER.)"
           ]
         }
+      },
+      {
+        "requires": [],
+        "type": "CARNIVAL",
+        "data": {}
       }
     ]
   },

@@ -101,9 +101,10 @@ let lastKey = '';
 
 /**
  * Makes a vocabulary multiple choice question from the selected contacts.
+ * @param {boolean} [forceToFrench] always ask Dutch -> French
  * @returns {Question}
  */
-export function makeVocabQuestion() {
+export function makeVocabQuestion(forceToFrench = false) {
   const contacts = getSelectedContacts();
   let pool = WORDS.filter((w) => contacts.includes(w.contact));
   if (pool.length < 4) pool = WORDS;
@@ -112,7 +113,7 @@ export function makeVocabQuestion() {
   if (wordKey(target) === lastKey && pool.length > 1) target = pickWeighted(pool);
   lastKey = wordKey(target);
 
-  const toFrench = Math.random() < 0.5;
+  const toFrench = forceToFrench || Math.random() < 0.5;
   const ask = toFrench ? target.nl : target.fr;
   const answer = toFrench ? target.fr : target.nl;
   const answerField = toFrench ? 'fr' : 'nl';
@@ -185,9 +186,12 @@ function makeVerbQuestion() {
 
 // ---------- grammar: le / la / l' / un / une (C3) ----------
 
-/** nouns from the list with their gender */
-function nouns() {
-  return WORDS.map((w) => {
+/**
+ * nouns from the list with their gender
+ * @param {number[]} [contacts] only these contacts (all when left out)
+ */
+export function nouns(contacts) {
+  return WORDS.filter((w) => !contacts || contacts.includes(w.contact)).map((w) => {
     const m = /^(un|une|le|la)\s+(.+)$/i.exec(w.fr);
     if (!m) return undefined;
     const feminine = m[1] === 'une' || m[1] === 'la';
@@ -196,10 +200,14 @@ function nouns() {
   }).filter(Boolean);
 }
 
-/** @returns {Question | undefined} */
-function makeArticleQuestion() {
-  if (!getSelectedContacts().includes(3)) return undefined;
-  const list = nouns();
+/**
+ * @param {boolean} [anyContact] also when Contact 3 is not chosen (kermis), with nouns of the chosen contacts
+ * @returns {Question | undefined}
+ */
+export function makeArticleQuestion(anyContact = false) {
+  if (!anyContact && !getSelectedContacts().includes(3)) return undefined;
+  let list = anyContact ? nouns(getSelectedContacts()) : nouns();
+  if (list.length < 3) list = nouns();
   const n = list[Math.floor(Math.random() * list.length)];
   const definite = Math.random() < 0.5;
   let options;
