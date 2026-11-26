@@ -23,6 +23,8 @@ import {
   STORY_FLAGS,
   STORY_GATES,
   THIEF_FLAGS,
+  STARS_PER_CHAPTER,
+  chapterTasksDone,
   nextChapterToOpen,
   nextGoalText,
   questText,
@@ -97,6 +99,8 @@ export class WorldScene extends BaseScene {
   #nextStoryCheck = 0;
   /** @type {boolean} */
   #storyEndPending = false;
+  /** @type {number} chapter for which the "earn stars" tip was shown */
+  static starTipShownForChapter = -1;
   /** @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   #collisionLayer;
   /** @type {{[key: string]: Phaser.GameObjects.Zone}} */
@@ -1631,6 +1635,16 @@ export class WorldScene extends BaseScene {
         '⭐ WAUW! Je hebt al 500 sterren verdiend! ⭐',
         'Je krijgt de sleutel tot de school! Hij zit in je tas.',
         'Er staat een geheim huisje in het dorp... Zou hij daar passen?',
+      ]);
+      return;
+    }
+    const done = chapterTasksDone(flags);
+    if (done >= 0 && chapterStars < STARS_PER_CHAPTER && WorldScene.starTipShownForChapter !== done) {
+      WorldScene.starTipShownForChapter = done;
+      this.#dialogUi.showDialogModal([
+        'Super, alle taken van dit hoofdstuk zijn klaar!',
+        `Verdien nu nog ${STARS_PER_CHAPTER - chapterStars} sterren om verder te gaan.`,
+        'Druk op ENTER (of MENU) en kies KERMIS. Of speel Zeg me na!',
       ]);
       return;
     }

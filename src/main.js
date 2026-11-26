@@ -67,3 +67,6 @@ import('./utils/data-manager.js').then(({ dataManager, DATA_MANAGER_STORE_KEYS }
     if (document.visibilityState === 'hidden') saveIfPlaying();
   });
 });
+
+// buttons on the screen for tablets and phones
+import('./utils/touch-controls.js').then(({ setupTouchControls }) => setupTouchControls());

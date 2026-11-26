@@ -51,6 +51,8 @@ Bij de start kies je welke Contacts je wil oefenen.
 | L | Luisteren (Frans voorlezen) |
 | F | Volledig scherm |
 
+Op een tablet of gsm verschijnen knoppen op het scherm: een kruis om te wandelen, **A** (= spatie), **B** (= terug) en **MENU**. Met de 🎮-knop rechtsboven zet je ze aan of uit.
+
 ## Woordenlijst aanpassen
 
 - Woorden: `src/vocab/words.js` (Frans, Nederlands, Contact).

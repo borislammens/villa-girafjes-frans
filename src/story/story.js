@@ -125,7 +125,7 @@ export function questText(flags, chapterStars = 0) {
   const lines = ch.goals.map((g) => `${flags.has(g.flag) ? '✔' : '○'} ${g.text}`);
   if (idx < CHAPTERS.length - 1) {
     const n = Math.min(chapterStars, STARS_PER_CHAPTER);
-    lines.push(`${n >= STARS_PER_CHAPTER ? '✔' : '○'} Verdien ${STARS_PER_CHAPTER} sterren: ⭐ ${n}/${STARS_PER_CHAPTER} (ENTER > KERMIS)`);
+    lines.push(`${n >= STARS_PER_CHAPTER ? '✔' : '○'} Verdien ${STARS_PER_CHAPTER} sterren: ⭐ ${n}/${STARS_PER_CHAPTER} (menu > KERMIS)`);
   }
   return `📖 ${ch.title}\n${lines.join('\n')}`;
 }
@@ -142,7 +142,7 @@ export function nextGoalText(flags, chapterStars = 0) {
   if (idx >= CHAPTERS.length) return 'Je hebt het verhaal uitgespeeld! In het noorden woont nog de grote woordjesdief...';
   const goal = CHAPTERS[idx].goals.find((g) => !flags.has(g.flag));
   if (goal) return goal.text;
-  return `Verdien nog ${Math.max(0, STARS_PER_CHAPTER - chapterStars)} sterren op de kermis (ENTER > KERMIS) of met Zeg me na.`;
+  return `Verdien nog ${Math.max(0, STARS_PER_CHAPTER - chapterStars)} sterren op de kermis (menu > KERMIS) of met Zeg me na.`;
 }
 
 /**
@@ -156,6 +156,16 @@ export function nextChapterToOpen(flags, chapterStars = 0) {
   if (idx < 0 || idx >= CHAPTERS.length - 1) return undefined;
   const done = CHAPTERS[idx].goals.every((g) => flags.has(g.flag)) && chapterStars >= STARS_PER_CHAPTER;
   return done ? CHAPTERS[idx + 1] : undefined;
+}
+
+/**
+ * @param {Set<string>} flags
+ * @returns {number} index of the current chapter when all its tasks are done (stars not counted), else -1
+ */
+export function chapterTasksDone(flags) {
+  const idx = currentChapterIndex(flags);
+  if (idx < 0 || idx >= CHAPTERS.length - 1) return -1;
+  return CHAPTERS[idx].goals.every((g) => flags.has(g.flag)) ? idx : -1;
 }
 
 /**
@@ -188,4 +198,4 @@ export const EXTRA_NPCS = [
 ];
 
 /** The secret little house in the village: only the "sleutel tot de school" opens it. */
-export const SECRET_HOUSE = Object.freeze({ area: 'main_1', x: 26, y: 77, w: 3, h: 2, doorX: 27, doorY: 78 });
+export const SECRET_HOUSE = Object.freeze({ area: 'main_1', x: 26, y: 78, w: 3, h: 2, doorX: 27, doorY: 79 });
