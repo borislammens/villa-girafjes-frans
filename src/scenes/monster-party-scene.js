@@ -424,11 +424,15 @@ export class MonsterPartyScene extends BaseScene {
       case ITEM_EFFECT.HEAL_30:
         this.#handleHealItemUsed(30);
         break;
-      case ITEM_EFFECT.CAPTURE_1:
-        // these items should not be useable in this scene
+      case ITEM_EFFECT.HEAL_50:
+        this.#handleHealItemUsed(50);
+        break;
+      case ITEM_EFFECT.HEAL_FULL:
+        this.#handleHealItemUsed(9999);
         break;
       default:
-        exhaustiveGuard(this.#sceneData.itemSelected.effect);
+        // other items are not used in this scene
+        break;
     }
   }
 
@@ -464,7 +468,7 @@ export class MonsterPartyScene extends BaseScene {
     ) {
       this.#monsters[this.#selectedPartyMonsterIndex].currentHp = this.#monsters[this.#selectedPartyMonsterIndex].maxHp;
     }
-    this.#infoTextGameObject.setText(`Monster kreeg ${amount} HP terug`);
+    this.#infoTextGameObject.setText(amount >= 9999 ? 'Je monster is weer helemaal fit!' : `Monster kreeg ${amount} HP terug`);
     this.#healthBars[this.#selectedPartyMonsterIndex].setMeterPercentageAnimated(
       this.#monsters[this.#selectedPartyMonsterIndex].currentHp / this.#monsters[this.#selectedPartyMonsterIndex].maxHp,
       {

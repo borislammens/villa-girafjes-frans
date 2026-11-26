@@ -72,6 +72,10 @@ import Phaser from '../lib/phaser.js';
 export const ITEM_CATEGORY = Object.freeze({
   HEAL: 'HEAL',
   CAPTURE: 'CAPTURE',
+  /** helps with the next quiz question in a battle, does not cost a turn */
+  BATTLE_HELP: 'BATTLE_HELP',
+  /** used in the world, outside battles */
+  WORLD: 'WORLD',
 });
 
 /**
@@ -81,7 +85,18 @@ export const ITEM_CATEGORY = Object.freeze({
 /** @enum {ItemEffect} */
 export const ITEM_EFFECT = Object.freeze({
   HEAL_30: 'HEAL_30',
+  HEAL_50: 'HEAL_50',
+  HEAL_FULL: 'HEAL_FULL',
   CAPTURE_1: 'CAPTURE_1',
+  CAPTURE_2: 'CAPTURE_2',
+  CAPTURE_ALWAYS: 'CAPTURE_ALWAYS',
+  REMOVE_TWO_WRONG: 'REMOVE_TWO_WRONG',
+  SHOW_ANSWER: 'SHOW_ANSWER',
+  SLOW_LISTEN: 'SLOW_LISTEN',
+  FORGIVE_MISTAKE: 'FORGIVE_MISTAKE',
+  REPEL_100: 'REPEL_100',
+  COMPASS: 'COMPASS',
+  SCHOOL_KEY: 'SCHOOL_KEY',
 });
 
 /**
@@ -92,6 +107,8 @@ export const ITEM_EFFECT = Object.freeze({
  * @property {ItemEffect} effect the effect of using this item
  * @property {string} description the description of the item to show in the inventory bag
  * @property {ItemCategory} category the main category of this item, healing, capture, etc
+ * @property {number} [price] price in stars in the shop of Madame Dupont
+ * @property {boolean} [keep] true when the item is not used up
  */
 
 /**
@@ -136,6 +153,8 @@ export const NPC_EVENT_TYPE = Object.freeze({
   FRENCH_CHAT: 'FRENCH_CHAT',
   REPEAT_GAME: 'REPEAT_GAME',
   CARNIVAL: 'CARNIVAL',
+  SHOP: 'SHOP',
+  STORY_END: 'STORY_END',
 });
 
 /**

@@ -1,16 +1,30 @@
 {
   "1": {
-    "frame": 30,
-    "animationKeyPrefix": "NPC_1",
+    "frame": 50,
+    "animationKeyPrefix": "NPC_6",
     "events": [
       {
         "requires": [
-          "LOOKING_FOR_PROFESSOR"
+          "CH1",
+          "!CH2"
         ],
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "De professor hiernaast zocht je."
+            "Begroet je nieuwe vrienden in het dorp: Héléna, Adam en Séverine.",
+            "Kijk linksboven in beeld wat je nog moet doen."
+          ]
+        }
+      },
+      {
+        "requires": [
+          "CH4",
+          "!GAVE_GIFT"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Juf Annelies is jarig! Heb je al een cadeau? De winkel is naast ons huis."
           ]
         }
       },
@@ -57,59 +71,125 @@
     ]
   },
   "2": {
-    "frame": 20,
-    "animationKeyPrefix": "NPC_3",
+    "frame": 30,
+    "animationKeyPrefix": "NPC_4",
     "events": [
       {
-        "requires": [],
+        "requires": [
+          "CH1",
+          "!MET_HELENA"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Salut! Moi, c'est Héléna. Ik ben nieuw in het dorp, net als jij!"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "CH1",
+          "!MET_HELENA"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Héléna",
+          "dialogueId": "c1-bonjour",
+          "mustBeRight": true
+        }
+      },
+      {
+        "requires": [
+          "CH1",
+          "!MET_HELENA"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Héléna",
+          "dialogueId": "c1-cava",
+          "flag": "MET_HELENA"
+        }
+      },
+      {
+        "requires": [
+          "MET_HELENA"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Lees de bordjes in het dorp, daar staan handige tips op!"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "MET_HELENA"
+        ],
         "type": "FRENCH_CHAT",
         "data": {
           "name": "Héléna"
-        }
-      },
-      {
-        "requires": [
-          "LOOKING_FOR_PROFESSOR"
-        ],
-        "type": "MESSAGE",
-        "data": {
-          "messages": [
-            "Ik zag de professor net het dorp uit gaan."
-          ]
-        }
-      },
-      {
-        "requires": [
-          "FOUND_PROFESSOR"
-        ],
-        "type": "MESSAGE",
-        "data": {
-          "messages": [
-            "Lees de bordjes, daar staan handige tips op!"
-          ]
         }
       }
     ]
   },
   "3": {
-    "frame": 0,
-    "animationKeyPrefix": "NPC_1",
+    "frame": 20,
+    "animationKeyPrefix": "NPC_3",
     "events": [
       {
-        "requires": [],
-        "type": "FRENCH_CHAT",
-        "data": {
-          "name": "Adam"
-        }
-      },
-      {
-        "requires": [],
+        "requires": [
+          "CH1",
+          "!MET_ADAM"
+        ],
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Je kan je spel bewaren via het menu.",
-            "Druk op ENTER om het menu te openen."
+            "Salut! Ik ben Adam. Spreek jij ook Frans?"
           ]
+        }
+      },
+      {
+        "requires": [
+          "CH1",
+          "!MET_ADAM"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Adam",
+          "dialogueId": "c1-comment",
+          "mustBeRight": true
+        }
+      },
+      {
+        "requires": [
+          "CH1",
+          "!MET_ADAM"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Adam",
+          "dialogueId": "c1-moi",
+          "flag": "MET_ADAM"
+        }
+      },
+      {
+        "requires": [
+          "MET_ADAM"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Je spel wordt vanzelf bewaard. Druk op ENTER voor het menu."
+          ]
+        }
+      },
+      {
+        "requires": [
+          "MET_ADAM"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Adam"
         }
       }
     ]
@@ -125,7 +205,8 @@
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Hé! Zin in een gevecht?"
+            "Hé hé! Ik ben een woordjesdief!",
+            "Ik pik alle Franse woordjes. Wil je er langs? Versla mij dan maar!"
           ]
         }
       },
@@ -135,7 +216,7 @@
         ],
         "type": "FRENCH_CHAT",
         "data": {
-          "name": "Jonge trainer"
+          "name": "Woordjesdief"
         }
       },
       {
@@ -148,9 +229,9 @@
             7
           ],
           "assetKey": "TRAINER_YOUTH_GIRL",
-          "trainerName": "Jonge trainer",
+          "trainerName": "Woordjesdief",
           "trainerLostMessages": [
-            "Je hebt me verslagen!"
+            "Oh nee! Je kent te veel Franse woordjes!"
           ]
         }
       },
@@ -161,14 +242,14 @@
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Dat was een super gevecht!"
+            "Oké, oké, je mag erdoor. Nabil is in de stad, recht naar het noorden."
           ]
         }
       }
     ]
   },
   "5": {
-    "frame": 180,
+    "frame": 140,
     "animationKeyPrefix": "NPC_19",
     "events": [
       {
@@ -178,7 +259,8 @@
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Hé! Zin in een gevecht?"
+            "Hihihi! Ik ben ook een woordjesdief!",
+            "Ik heb Sacha's woordjes gepikt. Pak ze maar terug!"
           ]
         }
       },
@@ -188,7 +270,7 @@
         ],
         "type": "FRENCH_CHAT",
         "data": {
-          "name": "Jonge trainer"
+          "name": "Woordjesdief"
         }
       },
       {
@@ -201,9 +283,9 @@
             6
           ],
           "assetKey": "TRAINER_YOUTH_BOY",
-          "trainerName": "Jonge trainer",
+          "trainerName": "Woordjesdief",
           "trainerLostMessages": [
-            "Jij bent sterk!"
+            "Grrr! Je bent sterk in Frans!"
           ]
         }
       },
@@ -214,30 +296,71 @@
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Ik moet nog meer oefenen."
+            "Ik pik nooit meer woordjes. Beloofd!"
           ]
         }
       }
     ]
   },
   "6": {
-    "frame": 60,
-    "animationKeyPrefix": "NPC_7",
+    "frame": 180,
+    "animationKeyPrefix": "NPC_19",
     "events": [
       {
-        "requires": [],
-        "type": "FRENCH_CHAT",
+        "requires": [
+          "CH2",
+          "!MET_NABIL"
+        ],
+        "type": "MESSAGE",
         "data": {
-          "name": "Séverine"
+          "messages": [
+            "Salut! Ik ben Nabil. Iedereen is naar de stad gekomen. Weet jij waar ze heen gaan?"
+          ]
         }
       },
       {
-        "requires": [],
+        "requires": [
+          "CH2",
+          "!MET_NABIL"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Nabil",
+          "dialogueId": "c2-tuvas",
+          "mustBeRight": true
+        }
+      },
+      {
+        "requires": [
+          "CH2",
+          "!MET_NABIL"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Nabil",
+          "dialogueId": "c2-adam",
+          "flag": "MET_NABIL"
+        }
+      },
+      {
+        "requires": [
+          "MET_NABIL"
+        ],
         "type": "MESSAGE",
         "data": {
           "messages": [
             "Zorg dat je genoeg drankjes in je tas hebt."
           ]
+        }
+      },
+      {
+        "requires": [
+          "MET_NABIL"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Nabil",
+          "contact": 2
         }
       }
     ]
@@ -275,11 +398,47 @@
     "animationKeyPrefix": "NPC_17",
     "events": [
       {
+        "requires": [
+          "CH3",
+          "!FOUND_SACHA"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Oh! Je hebt me gevonden! Ik ben Sacha."
+          ]
+        }
+      },
+      {
+        "requires": [
+          "CH3",
+          "!FOUND_SACHA"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Sacha",
+          "dialogueId": "c3-tuesou",
+          "mustBeRight": true
+        }
+      },
+      {
+        "requires": [
+          "CH3",
+          "!FOUND_SACHA"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Sacha",
+          "dialogueId": "c3-ouca",
+          "flag": "FOUND_SACHA"
+        }
+      },
+      {
         "requires": [],
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Salut! Ik ben Léa. Zullen we Frans spreken? Zeg me na!"
+            "Salut! Zullen we Frans spreken? Zeg me na! Je verdient er sterren mee."
           ]
         }
       },
@@ -287,7 +446,7 @@
         "requires": [],
         "type": "REPEAT_GAME",
         "data": {
-          "name": "Léa"
+          "name": "Sacha"
         }
       },
       {
@@ -295,14 +454,14 @@
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Laat je monsters eerst uitrusten voor je op pad gaat!"
+            "À bientôt!"
           ]
         }
       }
     ]
   },
   "9": {
-    "frame": 180,
+    "frame": 100,
     "animationKeyPrefix": "NPC_19",
     "events": [
       {
@@ -312,7 +471,8 @@
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Hé! Zin in een gevecht?"
+            "MWAHAHA! Ik ben de grote woordjesdief!",
+            "Al de Franse woordjes van de stad zitten in mijn zak!"
           ]
         }
       },
@@ -322,7 +482,7 @@
         ],
         "type": "FRENCH_CHAT",
         "data": {
-          "name": "Jonge trainer"
+          "name": "Grote woordjesdief"
         }
       },
       {
@@ -336,9 +496,10 @@
             7
           ],
           "assetKey": "TRAINER_YOUTH_BOY",
-          "trainerName": "Jonge trainer",
+          "trainerName": "Grote woordjesdief",
           "trainerLostMessages": [
-            "I'll need to keep practicing."
+            "Neeee! Mijn woordjes!",
+            "Goed dan, je bent de beste in Frans!"
           ]
         }
       },
@@ -349,16 +510,64 @@
         "type": "MESSAGE",
         "data": {
           "messages": [
-            "Ik moet trainen voor we nog eens vechten!"
+            "Je hebt de grote woordjesdief verslagen. Bravo!"
           ]
         }
       }
     ]
   },
   "10": {
-    "frame": 50,
-    "animationKeyPrefix": "NPC_6",
+    "frame": 0,
+    "animationKeyPrefix": "NPC_1",
     "events": [
+      {
+        "requires": [
+          "CH3",
+          "!MET_PAPA"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Hallo! Ik ben de papa van Sacha. Le dîner est prêt! Maar waar is iedereen?"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "CH3",
+          "!MET_PAPA"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Papa",
+          "dialogueId": "c3-vousetesla",
+          "mustBeRight": true
+        }
+      },
+      {
+        "requires": [
+          "CH3",
+          "!MET_PAPA"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Papa",
+          "dialogueId": "c3-diner",
+          "flag": "MET_PAPA"
+        }
+      },
+      {
+        "requires": [
+          "MET_PAPA",
+          "!FOUND_SACHA"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Kan jij Sacha zoeken? Ze speelt vast rechts in de stad."
+          ]
+        }
+      },
       {
         "requires": [],
         "type": "MESSAGE",
@@ -389,6 +598,208 @@
           "messages": [
             "Zo! Jij en je monsters zijn weer helemaal fit!"
           ]
+        }
+      }
+    ]
+  },
+  "11": {
+    "frame": 70,
+    "animationKeyPrefix": "NPC_8",
+    "events": [
+      {
+        "requires": [
+          "CH1",
+          "!MET_SEVERINE"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Salut! Moi, c'est Séverine. Ik moet bijna naar huis..."
+          ]
+        }
+      },
+      {
+        "requires": [
+          "CH1",
+          "!MET_SEVERINE"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Séverine",
+          "dialogueId": "c1-aurevoir",
+          "mustBeRight": true
+        }
+      },
+      {
+        "requires": [
+          "CH1",
+          "!MET_SEVERINE"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Séverine",
+          "dialogueId": "c1-demain",
+          "flag": "MET_SEVERINE"
+        }
+      },
+      {
+        "requires": [
+          "MET_SEVERINE"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Wist je dat er een geheim huisje in het dorp staat? Niemand weet waar de sleutel is..."
+          ]
+        }
+      },
+      {
+        "requires": [
+          "MET_SEVERINE"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Séverine"
+        }
+      }
+    ]
+  },
+  "12": {
+    "frame": 90,
+    "animationKeyPrefix": "NPC_8",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Bonjour! Ik ben Madame Dupont. Bienvenue au magasin!"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "CH4",
+          "!HAS_GIFT"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Madame Dupont",
+          "dialogueId": "shop-cadeau",
+          "flag": "HAS_GIFT"
+        }
+      },
+      {
+        "requires": [
+          "HAS_GIFT",
+          "!GAVE_GIFT"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "🎁 Je hebt een cadeau voor juf Annelies: un ticket de cinéma!",
+            "Ze is bij de kermis in de stad."
+          ]
+        }
+      },
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Hier koop je spullen voor je tas met je sterren."
+          ]
+        }
+      },
+      {
+        "requires": [],
+        "type": "SHOP",
+        "data": {}
+      }
+    ]
+  },
+  "13": {
+    "frame": 40,
+    "animationKeyPrefix": "NPC_5",
+    "events": [
+      {
+        "requires": [
+          "!CH4"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Bonjour! Ik ben juf Annelies. Amuse-toi bien!"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "!CH4"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Juf Annelies"
+        }
+      },
+      {
+        "requires": [
+          "CH4",
+          "!HAS_GIFT"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Bonjour! Vandaag is het feest...",
+            "(Je hebt nog geen cadeau. Ga naar de winkel van Madame Dupont, naast je huis in het dorp.)"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "CH4",
+          "HAS_GIFT",
+          "!GAVE_GIFT"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Juf Annelies",
+          "dialogueId": "c4-anniv",
+          "mustBeRight": true
+        }
+      },
+      {
+        "requires": [
+          "CH4",
+          "HAS_GIFT",
+          "!GAVE_GIFT"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Juf Annelies",
+          "dialogueId": "c4-cadeau",
+          "flag": "GAVE_GIFT",
+          "ending": true
+        }
+      },
+      {
+        "requires": [
+          "GAVE_GIFT"
+        ],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Merci encore pour le cadeau! Je vais au cinéma ce soir!"
+          ]
+        }
+      },
+      {
+        "requires": [
+          "GAVE_GIFT"
+        ],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Juf Annelies"
         }
       }
     ]

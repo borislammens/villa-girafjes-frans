@@ -4,7 +4,80 @@ import { dataManager } from '../utils/data-manager.js';
 
 export const WORD_FONT = 'Verdana, "Trebuchet MS", Arial, sans-serif';
 export const STARS_KEY = 'franse-woordjes-sterren';
+/** all stars ever earned (spending in the shop does not lower this) */
+export const STARS_EARNED_KEY = 'franse-woordjes-sterren-verdiend';
+/** stars earned when the current chapter opened */
+export const CHAPTER_STARS_KEY = 'franse-woordjes-sterren-hoofdstuk';
 const PRIZE_EVERY = 10;
+
+/**
+ * @param {string} key
+ * @param {number} [fallback]
+ * @returns {number}
+ */
+function readNumber(key, fallback = 0) {
+  try {
+    const v = localStorage.getItem(key);
+    return v === null ? fallback : Number(v) || 0;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
+ * @param {string} key
+ * @param {number} value
+ */
+function writeNumber(key, value) {
+  try {
+    localStorage.setItem(key, String(value));
+  } catch {
+    // ignore
+  }
+}
+
+/** @returns {number} all stars ever earned */
+export function getStarsEarned() {
+  return Math.max(readNumber(STARS_EARNED_KEY, getStars()), getStars());
+}
+
+/** @returns {number} stars earned since the current chapter opened */
+export function getChapterStars() {
+  return Math.max(0, getStarsEarned() - readNumber(CHAPTER_STARS_KEY, 0));
+}
+
+/** Call when a new chapter opens: the chapter star count starts again at 0. */
+export function startChapterStars() {
+  writeNumber(CHAPTER_STARS_KEY, getStarsEarned());
+}
+
+/**
+ * Spends stars in the shop.
+ * @param {number} amount
+ * @returns {boolean} false when there are not enough stars
+ */
+export function spendStars(amount) {
+  const have = getStars();
+  if (have < amount) return false;
+  writeNumber(STARS_EARNED_KEY, getStarsEarned());
+  writeNumber(STARS_KEY, have - amount);
+  return true;
+}
+
+/**
+ * Restores all star counters (used by the save code).
+ * @param {{stars: number, earned: number, chapterStart: number}} s
+ */
+export function setStarCounters(s) {
+  writeNumber(STARS_KEY, s.stars);
+  writeNumber(STARS_EARNED_KEY, Math.max(s.earned, s.stars));
+  writeNumber(CHAPTER_STARS_KEY, s.chapterStart);
+}
+
+/** @returns {{stars: number, earned: number, chapterStart: number}} */
+export function getStarCounters() {
+  return { stars: getStars(), earned: getStarsEarned(), chapterStart: readNumber(CHAPTER_STARS_KEY, 0) };
+}
 
 /** @returns {number} */
 export function getStars() {
@@ -23,14 +96,13 @@ export function getStars() {
  */
 export function addStars(scene, amount) {
   const before = getStars();
+  const earnedBefore = getStarsEarned();
   const total = before + amount;
-  try {
-    localStorage.setItem(STARS_KEY, String(total));
-  } catch {
-    // ignore
-  }
+  writeNumber(STARS_KEY, total);
+  writeNumber(STARS_EARNED_KEY, earnedBefore + amount);
   const prizes = [];
-  for (let n = Math.floor(before / PRIZE_EVERY) + 1; n <= Math.floor(total / PRIZE_EVERY); n += 1) {
+  // prizes follow the stars ever earned, so spending stars never gives prizes twice
+  for (let n = Math.floor(earnedBefore / PRIZE_EVERY) + 1; n <= Math.floor((earnedBefore + amount) / PRIZE_EVERY); n += 1) {
     const itemId = n % 2 === 1 ? 1 : 2; // 1 = drankje, 2 = oude bal
     const item = DataUtils.getItem(scene, itemId);
     if (item) {

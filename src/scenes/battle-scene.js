@@ -15,7 +15,8 @@ import { DataUtils } from '../utils/data-utils.js';
 import { AUDIO_ASSET_KEYS, BATTLE_ASSET_KEYS } from '../assets/asset-keys.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { calculateExpGainedFromMonster, handleMonsterGainingExperience } from '../utils/leveling-utils.js';
-import { ITEM_CATEGORY } from '../types/typedef.js';
+import { ITEM_CATEGORY, ITEM_EFFECT } from '../types/typedef.js';
+import { itemBoosts } from '../items/item-effects.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { Ball } from '../battle/ball.js';
 import { sleep } from '../utils/time-utils.js';
@@ -231,6 +232,7 @@ export class BattleScene extends BaseScene {
       BATTLE_STATES.NPC_SWITCH_MONSTER,
       BATTLE_STATES.CAPTURE_ITEM_USED,
       BATTLE_STATES.FLEE_ATTEMPT,
+      BATTLE_STATES.QUIZ_RESULT,
     ].includes(this.#battleStateMachine.currentStateName) ||
       // "you used an item" message, shown while still in the player input state
       (this.#battleStateMachine.currentStateName === BATTLE_STATES.PLAYER_INPUT && this.#battleMenu.wasItemUsed);
@@ -246,7 +248,8 @@ export class BattleScene extends BaseScene {
         this.#battleStateMachine.currentStateName === BATTLE_STATES.SWITCH_MONSTER ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.NPC_SWITCH_MONSTER ||
         this.#battleStateMachine.currentStateName === BATTLE_STATES.CAPTURE_ITEM_USED ||
-        this.#battleStateMachine.currentStateName === BATTLE_STATES.FLEE_ATTEMPT)
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.FLEE_ATTEMPT ||
+        this.#battleStateMachine.currentStateName === BATTLE_STATES.QUIZ_RESULT)
     ) {
       this.#battleMenu.handlePlayerInput('OK');
       return;
@@ -409,7 +412,7 @@ export class BattleScene extends BaseScene {
       this.#activeEnemyMonster.playDeathAnimation(() => {
         const text = this.#isTrainerBattle
           ? `${this.#activeEnemyMonster.name} is knock-out.`
-          : `De wilde ${this.#activeEnemyMonster.name} is verslagen!`;
+          : `De wilde woordjesdief ${this.#activeEnemyMonster.name} is verslagen!`;
         this.#showMessagesAndWaitForInput([text], () => {
           this.#battleStateMachine.setState(BATTLE_STATES.GAIN_EXPERIENCE);
         });
@@ -546,7 +549,7 @@ export class BattleScene extends BaseScene {
 
           const text = this.#isTrainerBattle
             ? `${this.#sceneData.npc.name} stuurt ${this.#activeEnemyMonster.name}.`
-            : `Een wilde ${this.#activeEnemyMonster.name} verschijnt!`;
+            : `Een wilde woordjesdief verschijnt: ${this.#activeEnemyMonster.name}!`;
           this.#showMessagesAndWaitForInput([text], () => {
             // wait for text animation to complete and move to next state
             this.#battleStateMachine.setState(BATTLE_STATES.BRING_OUT_MONSTER);
@@ -873,6 +876,13 @@ export class BattleScene extends BaseScene {
           case ITEM_CATEGORY.HEAL:
             this.#battleStateMachine.setState(BATTLE_STATES.HEAL_ITEM_USED);
             break;
+          case ITEM_CATEGORY.BATTLE_HELP:
+            // helpers for the next question do not cost a turn (the battle menu already applied it)
+            this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+            break;
+          case ITEM_CATEGORY.WORLD:
+            this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+            break;
           default:
             exhaustiveGuard(this.#battleMenu.itemUsed.category);
         }
@@ -903,7 +913,9 @@ export class BattleScene extends BaseScene {
         // 3 shakes - caught, 2 shakes - off by 10, 1 shakes off by 30, 0 shakes off by more than 30
         // 1. throw ball animation, 2. shake ball animation, 3. break animation if needed, 4. monster re-appear if needed
 
-        const captureResults = calculateMonsterCaptureResults(this.#activeEnemyMonster);
+        const effect = this.#battleMenu.itemUsed?.effect;
+        const bonus = effect === ITEM_EFFECT.CAPTURE_ALWAYS ? 1000 : effect === ITEM_EFFECT.CAPTURE_2 ? 25 : 0;
+        const captureResults = calculateMonsterCaptureResults(this.#activeEnemyMonster, bonus);
         const diffInCapture = captureResults.requiredCaptureValue - captureResults.actualCaptureValue;
         let numberOfShakes = 0;
         if (diffInCapture <= 10) {
@@ -934,7 +946,7 @@ export class BattleScene extends BaseScene {
         await this.#activeEnemyMonster.playCatchAnimationFailed();
 
         // TODO: refactor to use async/await
-        this.#showMessagesAndWaitForInput(['Het wilde monster ontsnapt!'], () => {
+        this.#showMessagesAndWaitForInput(['De wilde woordjesdief ontsnapt!'], () => {
           this.time.delayedCall(500, () => {
             this.#enemyAttack(() => {
               this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
@@ -983,6 +995,14 @@ export class BattleScene extends BaseScene {
         if (this.#quizResult && this.#quizResult.correct) {
           this.#playerAttack(() => {
             this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+          });
+          return;
+        }
+        if (itemBoosts.forgiveMistake) {
+          itemBoosts.forgiveMistake = false;
+          this._controls.lockInput = false;
+          this.#showMessagesAndWaitForInput(['Het toverkrijtje wist je fout uit!', 'Probeer nog eens.'], () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
           });
           return;
         }

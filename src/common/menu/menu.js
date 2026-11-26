@@ -13,6 +13,7 @@ const MENU_LABELS = Object.freeze({
   BAG: 'TAS',
   KERMIS: 'KERMIS',
   SAVE: 'BEWAREN',
+  CODE: 'BEWAARCODE',
   OPTIONS: 'OPTIES',
   EXIT: 'SLUITEN',
 });

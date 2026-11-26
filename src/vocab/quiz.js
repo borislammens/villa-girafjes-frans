@@ -234,7 +234,7 @@ export function makeArticleQuestion(anyContact = false) {
  * "Wat hoor je?": the French word is read aloud, the child picks the written French word.
  * @returns {Question | undefined}
  */
-function makeListenQuestion() {
+export function makeListenQuestion() {
   if (!canSpeakFrench()) return undefined;
   let q;
   // a Dutch-to-French question has French options; keep trying until we get one
@@ -273,13 +273,20 @@ let lastChat = -1;
 /**
  * A conversation for an NPC, from the chosen contacts.
  * @param {string} speaker
+ * @param {{dialogueId?: string, contact?: number}} [opts] a fixed story dialogue, or a random one of a contact
  * @returns {Question}
  */
-export function makeChatQuestion(speaker) {
-  const contacts = getSelectedContacts();
-  let pool = DIALOGUES.map((d, i) => ({ d, i })).filter(({ d }) => contacts.includes(d.contact));
-  if (pool.length === 0) pool = DIALOGUES.map((d, i) => ({ d, i }));
-  if (pool.length > 1) pool = pool.filter(({ i }) => i !== lastChat);
+export function makeChatQuestion(speaker, opts = {}) {
+  const all = DIALOGUES.map((d, i) => ({ d, i }));
+  let pool;
+  if (opts.dialogueId) {
+    pool = all.filter(({ d }) => d.id === opts.dialogueId);
+  } else {
+    const contacts = opts.contact ? [opts.contact] : getSelectedContacts();
+    pool = all.filter(({ d }) => !d.storyOnly && contacts.includes(d.contact));
+    if (pool.length === 0) pool = all.filter(({ d }) => !d.storyOnly);
+    if (pool.length > 1) pool = pool.filter(({ i }) => i !== lastChat);
+  }
   const { d, i } = pool[Math.floor(Math.random() * pool.length)];
   lastChat = i;
   const options = shuffle(d.options);

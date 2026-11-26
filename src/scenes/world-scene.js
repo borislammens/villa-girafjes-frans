@@ -15,6 +15,23 @@ import { NPC, NPC_MOVEMENT_PATTERN } from '../world/characters/npc.js';
 import { WorldMenu } from '../world/world-menu.js';
 import { BaseScene } from './base-scene.js';
 import { makeChatQuestion } from '../vocab/quiz.js';
+import {
+  CHAPTERS,
+  ENDING_MESSAGES,
+  EXTRA_NPCS,
+  SECRET_HOUSE,
+  STORY_FLAGS,
+  STORY_GATES,
+  THIEF_FLAGS,
+  nextChapterToOpen,
+  nextGoalText,
+  questText,
+} from '../story/story.js';
+import { getChapterStars, getStarsEarned, startChapterStars } from '../carnival/carnival-ui.js';
+import { itemBoosts } from '../items/item-effects.js';
+import { makeSaveCodeNow } from '../save/save-game.js';
+import { showCodeOverlay } from '../save/code-ui.js';
+import { ITEM_EFFECT } from '../types/typedef.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { weightedRandom } from '../utils/random.js';
@@ -74,6 +91,14 @@ export class WorldScene extends BaseScene {
   #isProcessingNpcEvent;
   /** @type {boolean} */
   #isInFrenchChat = false;
+  /** @type {any} the FRENCH_CHAT event that is running now */
+  #currentChatEvent;
+  /** @type {number} */
+  #nextStoryCheck = 0;
+  /** @type {boolean} */
+  #storyEndPending = false;
+  /** @type {Phaser.Tilemaps.TilemapLayer | undefined} */
+  #collisionLayer;
   /** @type {{[key: string]: Phaser.GameObjects.Zone}} */
   #eventZones;
   /** @type {{[key: string]: Phaser.GameObjects.Rectangle}} */
@@ -225,6 +250,7 @@ export class WorldScene extends BaseScene {
       return;
     }
     collisionLayer.setAlpha(TILED_COLLISION_LAYER_ALPHA).setDepth(2);
+    this.#collisionLayer = collisionLayer;
 
     // create interactive layer
     const hasSignLayer = map.getObjectLayer(OBJECT_LAYER_NAMES.SIGN) !== null;
@@ -246,6 +272,9 @@ export class WorldScene extends BaseScene {
     }
     this.cameras.main.setZoom(0.8);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
+
+    // the secret little house (only the "sleutel tot de school" opens it)
+    this.#createSecretHouse();
 
     // create items and collisions
     this.#createItems(map);
@@ -313,6 +342,7 @@ export class WorldScene extends BaseScene {
       }
     });
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
+    this.#migrateOldSave();
     // save automatically, so closing the window never loses progress
     dataManager.saveData();
     this.time.addEvent({ delay: 15000, loop: true, callback: () => dataManager.saveData() });
@@ -323,6 +353,10 @@ export class WorldScene extends BaseScene {
     this.scene.launch(SCENE_KEYS.CUTSCENE_SCENE);
     this.scene.launch(SCENE_KEYS.DIALOG_SCENE);
     this.#dialogUi = /** @type {DialogScene} */ (this.scene.get(SCENE_KEYS.DIALOG_SCENE));
+    this.scene.launch(SCENE_KEYS.STORY_HUD_SCENE);
+    this.scene.moveAbove(SCENE_KEYS.WORLD_SCENE, SCENE_KEYS.STORY_HUD_SCENE);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scene.stop(SCENE_KEYS.STORY_HUD_SCENE));
+    this.#nextStoryCheck = 0;
     this.#specialEncounterTileImageGameObjectGroup = this.add.group({ classType: Phaser.GameObjects.Image });
   }
 
@@ -358,8 +392,15 @@ export class WorldScene extends BaseScene {
       return;
     }
 
+    if (time > this.#nextStoryCheck) {
+      this.#nextStoryCheck = time + 400;
+      this.#checkStory();
+    }
+
     if (selectedDirectionHeldDown !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
-      this.#player.moveCharacter(selectedDirectionHeldDown, isShiftKeyDown);
+      if (this.#player.isMoving || !this.#isBlockedByStory(selectedDirectionHeldDown)) {
+        this.#player.moveCharacter(selectedDirectionHeldDown, isShiftKeyDown);
+      }
     }
 
     if (wasSpaceKeyPressed && !this.#player.isMoving && !this.#menu.isVisible) {
@@ -393,6 +434,20 @@ export class WorldScene extends BaseScene {
           this.#dialogUi.showDialogModal(['Je spel is bewaard!']);
         }
 
+        if (this.#menu.selectedMenuOption === 'CODE') {
+          this.#menu.hide();
+          dataManager.saveData();
+          this._controls.lockInput = true;
+          this.input.keyboard.enabled = false;
+          showCodeOverlay(makeSaveCodeNow(), () => {
+            this.input.keyboard.enabled = true;
+            this.time.delayedCall(200, () => {
+              this._controls.lockInput = false;
+            });
+          });
+          return;
+        }
+
         if (this.#menu.selectedMenuOption === 'MONSTERS') {
           // at start of the game, handle when we have no monsters in our party
           if (dataManager.store.get(DATA_MANAGER_STORE_KEYS.MONSTERS_IN_PARTY).length === 0) {
@@ -423,7 +478,7 @@ export class WorldScene extends BaseScene {
           /** @type {import('./inventory-scene.js').InventorySceneData} */
           const sceneDataToPass = {
             previousSceneName: SCENE_KEYS.WORLD_SCENE,
-            itemCategoriesThatCannotBeUsed: [ITEM_CATEGORY.CAPTURE],
+            itemCategoriesThatCannotBeUsed: [ITEM_CATEGORY.CAPTURE, ITEM_CATEGORY.BATTLE_HELP],
           };
           this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
@@ -501,6 +556,15 @@ export class WorldScene extends BaseScene {
       return;
     }
 
+    if (
+      this.#sceneData.area === SECRET_HOUSE.area &&
+      targetPosition.x === SECRET_HOUSE.doorX * TILE_SIZE &&
+      targetPosition.y === SECRET_HOUSE.doorY * TILE_SIZE
+    ) {
+      this.#tryOpenSecretHouse();
+      return;
+    }
+
     const nearbyNpc = this.#npcs.find((npc) => {
       return npc.sprite.x === targetPosition.x && npc.sprite.y === targetPosition.y;
     });
@@ -573,10 +637,7 @@ export class WorldScene extends BaseScene {
       if (isOverlapping) {
         const eventId = parseInt(zone.name, 10);
         const eventData = DataUtils.getEventData(this, eventId);
-        const currentGameFlags = dataManager.getFlags();
-        const eventRequirementsMet = eventData.requires.every((flag) => {
-          return currentGameFlags.has(flag);
-        });
+        const eventRequirementsMet = this.#requirementsMet(eventData.requires);
         if (eventRequirementsMet) {
           this.#currentCutSceneId = parseInt(zone.name, 10);
           this.#startCutScene();
@@ -614,7 +675,13 @@ export class WorldScene extends BaseScene {
     if (this.#encounterZonePlayerIsEntering === undefined) {
       return;
     }
-    console.log(`[${WorldScene.name}:handlePlayerMovementInEncounterZone] player is in an encounter zone`);
+    if (itemBoosts.repelSteps > 0) {
+      itemBoosts.repelSteps -= 1;
+      if (itemBoosts.repelSteps === 0) {
+        this.#dialogUi.showDialogModal(['Het fluitje is uitgewerkt. Pas op voor wilde woordjesdieven!']);
+      }
+      return;
+    }
 
     this.#wildMonsterEncountered = Math.random() < 0.2;
     if (this.#wildMonsterEncountered) {
@@ -706,6 +773,26 @@ export class WorldScene extends BaseScene {
         id: npcId,
       });
       this.#npcs.push(npc);
+    });
+
+    // story characters that are not in the Tiled map
+    EXTRA_NPCS.filter((n) => n.area === this.#sceneData.area).forEach((n) => {
+      const npcDetails = DataUtils.getNpcData(this, n.id);
+      if (!npcDetails) return;
+      const position = { x: n.x * TILE_SIZE, y: n.y * TILE_SIZE };
+      this.#npcs.push(
+        new NPC({
+          scene: this,
+          position,
+          direction: DIRECTION.DOWN,
+          frame: npcDetails.frame,
+          npcPath: { 0: position },
+          movementPattern: NPC_MOVEMENT_PATTERN.IDLE,
+          events: npcDetails.events,
+          animationKeyPrefix: npcDetails.animationKeyPrefix,
+          id: n.id,
+        })
+      );
     });
   }
 
@@ -833,9 +920,46 @@ export class WorldScene extends BaseScene {
    */
   handleSceneResume(sys, data) {
     super.handleSceneResume(sys, data);
-    if (data && (data.quizAnswered || data.repeatDone || data.carnivalDone) && this.#isInFrenchChat) {
+    if (data && data.wasItemUsed && data.item) {
+      this._controls.lockInput = true;
+      this.time.delayedCall(250, () => {
+        this._controls.lockInput = false;
+        this.#useWorldItem(data.item);
+      });
+      return;
+    }
+    if (data && data.secretDone) {
+      this._controls.lockInput = true;
+      this.cameras.main.fadeIn(500);
+      this.time.delayedCall(300, () => {
+        this._controls.lockInput = false;
+      });
+      return;
+    }
+    if (data && (data.quizAnswered || data.repeatDone || data.carnivalDone || data.shopDone) && this.#isInFrenchChat) {
       this.#isInFrenchChat = false;
       this.#isProcessingNpcEvent = false;
+      const chat = this.#currentChatEvent;
+      this.#currentChatEvent = undefined;
+      if (data.quizAnswered && chat && chat.data) {
+        if (data.correct && chat.data.flag) {
+          dataManager.addFlag(chat.data.flag);
+          if (chat.data.ending) this.#storyEndPending = true;
+        }
+        if (!data.correct && (chat.data.flag || chat.data.mustBeRight)) {
+          // story chats need the right answer: stop the conversation, the child can simply try again
+          this.#lastNpcEventHandledIndex = this.#npcPlayerIsInteractingWith.events.length - 1;
+          this._controls.lockInput = true;
+          this.time.delayedCall(250, () => {
+            this._controls.lockInput = false;
+            this.#dialogUi.showDialogModal([
+              `${chat.data.name}: "Hmm, probeer nog eens!"`,
+              `(Praat nog eens met ${chat.data.name} om het opnieuw te proberen.)`,
+            ]);
+          });
+          return;
+        }
+      }
       // small pause so the key press that closed the chat does not open a new one
       this._controls.lockInput = true;
       this.time.delayedCall(250, () => {
@@ -858,6 +982,10 @@ export class WorldScene extends BaseScene {
       this.#npcPlayerIsInteractingWith = undefined;
       this.#lastNpcEventHandledIndex = -1;
       this.#isProcessingNpcEvent = false;
+      if (this.#storyEndPending) {
+        this.#storyEndPending = false;
+        this.#playStoryEnding();
+      }
       return;
     }
 
@@ -867,17 +995,7 @@ export class WorldScene extends BaseScene {
     const eventType = eventToHandle.type;
 
     // check to see if this event should be handled based on story flags
-    const currentGameFlags = dataManager.getFlags();
-    const eventRequirementsMet = eventToHandle.requires.every((flag) => {
-      if (flag === BATTLE_FLAG.TRAINER_DEFEATED) {
-        return dataManager.getDefeatedNpcs().has(this.#npcPlayerIsInteractingWith.id);
-      }
-      if (flag === BATTLE_FLAG.TRAINER_NOT_DEFEATED) {
-        return !dataManager.getDefeatedNpcs().has(this.#npcPlayerIsInteractingWith.id);
-      }
-
-      return currentGameFlags.has(flag);
-    });
+    const eventRequirementsMet = this.#requirementsMet(eventToHandle.requires, this.#npcPlayerIsInteractingWith.id);
     if (!eventRequirementsMet) {
       // jump to next event
       this.#handleNpcInteraction();
@@ -956,11 +1074,26 @@ export class WorldScene extends BaseScene {
         this.#isProcessingNpcEvent = true;
         this.#isInFrenchChat = true;
         this._controls.lockInput = true;
+        this.#currentChatEvent = eventToHandle;
         this.scene.launch(SCENE_KEYS.QUIZ_SCENE, {
           previousSceneName: SCENE_KEYS.WORLD_SCENE,
-          question: makeChatQuestion(eventToHandle.data?.name || 'De buur'),
+          question: makeChatQuestion(eventToHandle.data?.name || 'De buur', {
+            dialogueId: eventToHandle.data?.dialogueId,
+            contact: eventToHandle.data?.contact,
+          }),
         });
         this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        break;
+      case NPC_EVENT_TYPE.SHOP:
+        this.#isProcessingNpcEvent = true;
+        this.#isInFrenchChat = true;
+        this._controls.lockInput = true;
+        this.scene.launch(SCENE_KEYS.SHOP_SCENE, { previousSceneName: SCENE_KEYS.WORLD_SCENE });
+        this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        break;
+      case NPC_EVENT_TYPE.STORY_END:
+        this.#storyEndPending = true;
+        this.#handleNpcInteraction();
         break;
       default:
         exhaustiveGuard(eventType);
@@ -1285,6 +1418,9 @@ export class WorldScene extends BaseScene {
    */
   #addGameFlag(gameEvent) {
     dataManager.addFlag(gameEvent.data.flag);
+    if (CHAPTERS.some((c) => c.flag === gameEvent.data.flag)) {
+      startChapterStars();
+    }
     this.#isProcessingCutSceneEvent = false;
     this.#handleCutSceneInteraction();
   }
@@ -1431,6 +1567,209 @@ export class WorldScene extends BaseScene {
     }
     this.#tiledLevelMaps[key] = this.make.tilemap({ key });
     return this.#tiledLevelMaps[key];
+  }
+
+  /**
+   * @param {string[]} requires flags; "!FLAG" means the flag must be missing
+   * @param {number} [npcId]
+   * @returns {boolean}
+   */
+  #requirementsMet(requires, npcId) {
+    const flags = dataManager.getFlags();
+    return (requires || []).every((flag) => {
+      if (flag === BATTLE_FLAG.TRAINER_DEFEATED) {
+        return dataManager.getDefeatedNpcs().has(npcId);
+      }
+      if (flag === BATTLE_FLAG.TRAINER_NOT_DEFEATED) {
+        return !dataManager.getDefeatedNpcs().has(npcId);
+      }
+      if (flag.startsWith('!')) {
+        return !flags.has(flag.slice(1));
+      }
+      return flags.has(flag);
+    });
+  }
+
+  /**
+   * Saves from before the story get the first chapter, so they can continue.
+   * @returns {void}
+   */
+  #migrateOldSave() {
+    const flags = dataManager.getFlags();
+    const viewed = dataManager.store.get(DATA_MANAGER_STORE_KEYS.VIEWED_EVENTS) || [];
+    if (!flags.has(STORY_FLAGS.CH1) && (viewed.includes(1) || flags.has('LOOKING_FOR_PROFESSOR'))) {
+      dataManager.addFlag(STORY_FLAGS.CH1);
+      startChapterStars();
+    }
+    if (flags.has('LOOKING_FOR_PROFESSOR')) {
+      dataManager.removeFlag('LOOKING_FOR_PROFESSOR');
+    }
+  }
+
+  /**
+   * Updates the task list, gives flags for beaten woordjesdieven and opens the next chapter when it is time.
+   * @returns {void}
+   */
+  #checkStory() {
+    const defeated = dataManager.getDefeatedNpcs();
+    Object.entries(THIEF_FLAGS).forEach(([id, flag]) => {
+      if (defeated.has(Number(id)) && !dataManager.getFlags().has(flag)) dataManager.addFlag(flag);
+    });
+    const flags = dataManager.getFlags();
+    const chapterStars = getChapterStars();
+    const hud = /** @type {any} */ (this.scene.get(SCENE_KEYS.STORY_HUD_SCENE));
+    if (hud && hud.setText) hud.setText(questText(flags, chapterStars));
+
+    if (this.#isPlayerInputLocked() || this.#player.isMoving || this.#npcPlayerIsInteractingWith || this.#isProcessingCutSceneEvent) {
+      return;
+    }
+    // 500 stars ever earned (spending does not count against it): the key to the school
+    if (getStarsEarned() >= 500 && !this.#hasItem(13)) {
+      dataManager.addItem(DataUtils.getItem(this, 13), 1);
+      dataManager.saveData();
+      this.#dialogUi.showDialogModal([
+        '⭐ WAUW! Je hebt al 500 sterren verdiend! ⭐',
+        'Je krijgt de sleutel tot de school! Hij zit in je tas.',
+        'Er staat een geheim huisje in het dorp... Zou hij daar passen?',
+      ]);
+      return;
+    }
+    const next = nextChapterToOpen(flags, chapterStars);
+    if (!next) return;
+    dataManager.addFlag(next.flag);
+    startChapterStars();
+    dataManager.saveData();
+    if (hud && hud.setText) hud.setText(questText(dataManager.getFlags(), 0));
+    this.#dialogUi.showDialogModal(['🎉 Hoofdstuk klaar! Bravo!', ...next.intro]);
+  }
+
+  /**
+   * @param {import('../common/direction.js').Direction} direction
+   * @returns {boolean} true when the story does not allow this step yet (shows a message)
+   */
+  #isBlockedByStory(direction) {
+    const x = Math.round(this.#player.sprite.x / TILE_SIZE);
+    const y = Math.round(this.#player.sprite.y / TILE_SIZE);
+    let ty = y;
+    if (direction === DIRECTION.UP) ty -= 1;
+    if (direction === DIRECTION.DOWN) ty += 1;
+    const flags = dataManager.getFlags();
+    const gate = STORY_GATES.find(
+      (g) => g.area === this.#sceneData.area && y >= g.row && ty < g.row && !flags.has(g.flag)
+    );
+    if (!gate) return false;
+    this.#dialogUi.showDialogModal(gate.message);
+    return true;
+  }
+
+  /** @returns {void} */
+  #createSecretHouse() {
+    if (this.#sceneData.area !== SECRET_HOUSE.area || !this.#collisionLayer) return;
+    const { x, y, w, h, doorX, doorY } = SECRET_HOUSE;
+    // block the tiles of the house
+    const blockTile = this.#collisionLayer.layer.data.flat().find((t) => t.index > 0);
+    if (blockTile) {
+      for (let tx = x; tx < x + w; tx += 1) {
+        for (let ty = y; ty < y + h; ty += 1) {
+          const tile = this.#collisionLayer.getTileAt(tx, ty, true);
+          if (tile) tile.index = blockTile.index;
+        }
+      }
+    }
+    const px = x * TILE_SIZE;
+    const py = y * TILE_SIZE;
+    const g = this.add.graphics().setDepth(1);
+    // walls
+    g.fillStyle(0xf3d9a4, 1).fillRect(px + 6, py + 20, w * TILE_SIZE - 12, h * TILE_SIZE - 20);
+    g.lineStyle(4, 0x6b4f2a, 1).strokeRect(px + 6, py + 20, w * TILE_SIZE - 12, h * TILE_SIZE - 20);
+    // roof
+    g.fillStyle(0xc0392b, 1).fillTriangle(px - 10, py + 26, px + w * TILE_SIZE + 10, py + 26, px + (w * TILE_SIZE) / 2, py - 60);
+    g.lineStyle(4, 0x7b241c, 1).strokeTriangle(px - 10, py + 26, px + w * TILE_SIZE + 10, py + 26, px + (w * TILE_SIZE) / 2, py - 60);
+    // door
+    const dx = doorX * TILE_SIZE;
+    const dy = doorY * TILE_SIZE;
+    g.fillStyle(0x8b5a2b, 1).fillRect(dx + 12, dy - 14, TILE_SIZE - 24, TILE_SIZE + 14);
+    g.fillStyle(0xffd700, 1).fillCircle(dx + TILE_SIZE - 20, dy + 26, 5);
+    // windows
+    g.fillStyle(0x9fd3f2, 1).fillRect(px + 22, py + 52, 36, 30).fillRect(px + w * TILE_SIZE - 58, py + 52, 36, 30);
+    this.add
+      .text(px + (w * TILE_SIZE) / 2, py - 14, '🔒 ?', { fontFamily: 'Verdana, Arial, sans-serif', fontSize: '26px', color: '#ffffff' })
+      .setOrigin(0.5)
+      .setDepth(1);
+  }
+
+  /**
+   * @param {number} itemId
+   * @returns {boolean}
+   */
+  #hasItem(itemId) {
+    const inv = dataManager.store.get(DATA_MANAGER_STORE_KEYS.INVENTORY) || [];
+    return inv.some((i) => i.item.id === itemId && i.quantity > 0);
+  }
+
+  /** @returns {void} */
+  #tryOpenSecretHouse() {
+    if (!this.#hasItem(13)) {
+      this.#dialogUi.showDialogModal([
+        'Een geheim huisje! De deur zit op slot.',
+        'Op het slot staat: "Alleen voor wie de sleutel tot de school heeft."',
+      ]);
+      return;
+    }
+    this._controls.lockInput = true;
+    this.cameras.main.fadeOut(500, 0, 0, 0, (_c, progress) => {
+      if (progress !== 1) return;
+      this.scene.launch(SCENE_KEYS.SECRET_ROOM_SCENE, { previousSceneName: SCENE_KEYS.WORLD_SCENE });
+      this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+    });
+  }
+
+  /**
+   * Items from the bag that do something in the world.
+   * @param {import('../types/typedef.js').Item} item
+   * @returns {void}
+   */
+  #useWorldItem(item) {
+    if (this.#menu.isVisible) this.#menu.hide();
+    switch (item.effect) {
+      case ITEM_EFFECT.REPEL_100:
+        itemBoosts.repelSteps = 100;
+        this.#dialogUi.showDialogModal(['Fuuuuut! 🎵 De wilde woordjesdieven schrikken.', '100 stappen lang laten ze je met rust.']);
+        break;
+      case ITEM_EFFECT.COMPASS:
+        this.#dialogUi.showDialogModal(['🧭 Het kompas wijst de weg:', nextGoalText(dataManager.getFlags(), getChapterStars())]);
+        break;
+      case ITEM_EFFECT.SCHOOL_KEY:
+        this.#dialogUi.showDialogModal([
+          '🔑 De sleutel tot de school! Hij glimt helemaal.',
+          'Er staat een geheim huisje in het dorp, rechts van de huizen. Zou hij daar passen...?',
+        ]);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /** @returns {void} */
+  #playStoryEnding() {
+    const cam = this.cameras.main;
+    const colors = [0xe94b5a, 0x4da3ff, 0xffb300, 0x8fdc8f, 0xc77dff];
+    for (let i = 0; i < 80; i += 1) {
+      const c = this.add
+        .rectangle(cam.worldView.x + Phaser.Math.Between(0, cam.worldView.width), cam.worldView.y - Phaser.Math.Between(10, 400), 12, 18, colors[i % colors.length])
+        .setDepth(10);
+      this.tweens.add({
+        targets: c,
+        y: cam.worldView.bottom + 40,
+        angle: Phaser.Math.Between(-360, 360),
+        duration: Phaser.Math.Between(2500, 4500),
+        delay: Phaser.Math.Between(0, 1500),
+        onComplete: () => c.destroy(),
+      });
+    }
+    playSoundFx(this, AUDIO_ASSET_KEYS.FLEE);
+    dataManager.saveData();
+    this.#dialogUi.showDialogModal([...ENDING_MESSAGES]);
   }
 
   /**

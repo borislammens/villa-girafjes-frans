@@ -17,6 +17,9 @@ import { CansScene } from './carnival/cans-scene.js';
 import { MemoryScene } from './carnival/memory-scene.js';
 import { DucksScene } from './carnival/ducks-scene.js';
 import { ContactSelectScene } from './scenes/contact-select-scene.js';
+import { ShopScene } from './scenes/shop-scene.js';
+import { SecretRoomScene } from './scenes/secret-room-scene.js';
+import { StoryHudScene } from './scenes/story-hud-scene.js';
 
 const game = new Phaser.Game({
   type: Phaser.CANVAS,
@@ -33,6 +36,7 @@ const game = new Phaser.Game({
 
 game.scene.add(SCENE_KEYS.PRELOAD_SCENE, PreloadScene);
 game.scene.add(SCENE_KEYS.WORLD_SCENE, WorldScene);
+game.scene.add(SCENE_KEYS.STORY_HUD_SCENE, StoryHudScene);
 game.scene.add(SCENE_KEYS.BATTLE_SCENE, BattleScene);
 game.scene.add(SCENE_KEYS.TITLE_SCENE, TitleScene);
 game.scene.add(SCENE_KEYS.OPTIONS_SCENE, OptionsScene);
@@ -48,6 +52,8 @@ game.scene.add(SCENE_KEYS.CARNIVAL_CANS_SCENE, CansScene);
 game.scene.add(SCENE_KEYS.CARNIVAL_MEMORY_SCENE, MemoryScene);
 game.scene.add(SCENE_KEYS.CARNIVAL_DUCKS_SCENE, DucksScene);
 game.scene.add(SCENE_KEYS.CONTACT_SELECT_SCENE, ContactSelectScene);
+game.scene.add(SCENE_KEYS.SHOP_SCENE, ShopScene);
+game.scene.add(SCENE_KEYS.SECRET_ROOM_SCENE, SecretRoomScene);
 game.scene.start(SCENE_KEYS.PRELOAD_SCENE);
 window.__game = game;
 

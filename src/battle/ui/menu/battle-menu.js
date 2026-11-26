@@ -1,3 +1,4 @@
+import { applyBattleHelpItem } from '../../../items/item-effects.js';
 import Phaser from '../../../lib/phaser.js';
 import { UI_ASSET_KEYS } from '../../../assets/asset-keys.js';
 import { DIRECTION } from '../../../common/direction.js';
@@ -703,7 +704,9 @@ export class BattleMenu {
       /** @type {import('../../../scenes/inventory-scene.js').InventorySceneData} */
       const sceneDataToPass = {
         previousSceneName: SCENE_KEYS.BATTLE_SCENE,
-        itemCategoriesThatCannotBeUsed: this.#isTrainerBattle ? [ITEM_CATEGORY.CAPTURE] : [],
+        itemCategoriesThatCannotBeUsed: this.#isTrainerBattle
+          ? [ITEM_CATEGORY.CAPTURE, ITEM_CATEGORY.WORLD]
+          : [ITEM_CATEGORY.WORLD],
       };
       this.#scene.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
       this.#scene.scene.pause(SCENE_KEYS.BATTLE_SCENE);
@@ -718,7 +721,7 @@ export class BattleMenu {
 
     if (this.#selectedBattleMenuOption === BATTLE_MENU_OPTIONS.FLEE) {
       if (this.#isTrainerBattle) {
-        this.updateInfoPaneMessagesAndWaitForInput(["You can't flee at this time!"], () => {
+        this.updateInfoPaneMessagesAndWaitForInput(["Van een woordjesdief kan je niet weglopen!"], () => {
           this.showMainBattleMenu();
         });
         return;
@@ -817,6 +820,10 @@ export class BattleMenu {
 
     this.#wasItemUsed = true;
     this.#usedItem = data.item;
+    if (data.item.category === ITEM_CATEGORY.BATTLE_HELP) {
+      this.updateInfoPaneMessagesAndWaitForInput(applyBattleHelpItem(data.item));
+      return;
+    }
     this.updateInfoPaneMessagesAndWaitForInput([`Je gebruikte: ${data.item.name}`]);
   }
 }

@@ -15,7 +15,7 @@ const CANNOT_USE_ITEM_TEXT = 'Dat kan je nu niet gebruiken.';
 const INVENTORY_ITEM_POSITION = Object.freeze({
   x: 50,
   y: 14,
-  space: 50,
+  space: 48,
 });
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
@@ -63,6 +63,8 @@ const INVENTORY_TEXT_STYLE = {
  */
 
 export class InventoryScene extends BaseScene {
+  /** @type {Phaser.GameObjects.Text} */
+  #cancelText;
   /** @type {InventorySceneData} */
   #sceneData;
   /** @type {NineSlice} */
@@ -94,7 +96,8 @@ export class InventoryScene extends BaseScene {
     this.#waitingForInput = false;
     this.#sceneData = data;
     this.#selectedInventoryOptionIndex = 0;
-    const inventory = dataManager.getInventory(this);
+    // empty items are not shown, so the bag stays short
+    const inventory = dataManager.getInventory(this).filter((i) => i.item && i.quantity > 0);
     this.#inventory = inventory.map((inventoryItem) => {
       return {
         item: inventoryItem.item,
@@ -168,10 +171,12 @@ export class InventoryScene extends BaseScene {
       INVENTORY_TEXT_STYLE
     );
     container.add(cancelText);
+    this.#cancelText = cancelText;
 
     // create player input cursor
     this.#userInputCursor = this.add.image(30, 30, UI_ASSET_KEYS.CURSOR).setScale(3);
     container.add(this.#userInputCursor);
+    this.#layoutRows();
 
     // create inventory description text
     this.#selectedInventoryDescriptionText = this.add.text(25, 420, '', {
@@ -243,6 +248,11 @@ export class InventoryScene extends BaseScene {
         // check to see if the selected item needs a target monster, example if selecting
         // a capture ball, no monster needed, vs selecting a potion, player needs to choose the
         // target monster
+        if (selectedItem.category === ITEM_CATEGORY.BATTLE_HELP) {
+          this.#handleItemUsed();
+          this.#goBackToPreviousScene(true, selectedItem);
+          return;
+        }
         if (selectedItem.category === ITEM_CATEGORY.CAPTURE) {
           // TODO: this logic will need to be updated if we support a monster storage system
           // validate we have room in our party before attempting capture
@@ -256,6 +266,13 @@ export class InventoryScene extends BaseScene {
           this.#goBackToPreviousScene(true, selectedItem);
           return;
         }
+      }
+
+      // items for the world (fluitje, kompas, sleutel) are used right away, the world shows what happens
+      if (selectedItem.category === ITEM_CATEGORY.WORLD) {
+        this.#handleItemUsed();
+        this.#goBackToPreviousScene(true, selectedItem);
+        return;
       }
 
       this._controls.lockInput = true;
@@ -369,9 +386,31 @@ export class InventoryScene extends BaseScene {
         exhaustiveGuard(direction);
     }
 
-    const y = 30 + this.#selectedInventoryOptionIndex * 50;
+    this.#layoutRows();
+  }
 
-    this.#userInputCursor.setY(y);
+  /**
+   * Shows at most 7 rows; the list scrolls with the cursor when the bag is full.
+   * @returns {void}
+   */
+  #layoutRows() {
+    const rows = 7;
+    const total = this.#inventory.length + 1;
+    const top = Phaser.Math.Clamp(this.#selectedInventoryOptionIndex - rows + 1, 0, Math.max(0, total - rows));
+    const place = (objects, index) => {
+      const visible = index >= top && index < top + rows;
+      const y = INVENTORY_ITEM_POSITION.y + (index - top) * INVENTORY_ITEM_POSITION.space;
+      objects.forEach((o) => {
+        if (!o) return;
+        o.setVisible(visible);
+        o.setY(o === objects[1] ? y + 2 : y);
+      });
+    };
+    this.#inventory.forEach((inv, index) => {
+      place([inv.gameObjects.itemName, inv.gameObjects.quantitySign, inv.gameObjects.quantity], index);
+    });
+    place([this.#cancelText], this.#inventory.length);
+    this.#userInputCursor.setY(30 + (this.#selectedInventoryOptionIndex - top) * INVENTORY_ITEM_POSITION.space);
   }
 
   /**
@@ -379,6 +418,9 @@ export class InventoryScene extends BaseScene {
    */
   #handleItemUsed() {
     const selectedItem = this.#inventory[this.#selectedInventoryOptionIndex];
+    if (selectedItem.item.keep) {
+      return selectedItem;
+    }
     selectedItem.quantity -= 1;
     selectedItem.gameObjects.quantity.setText(`${selectedItem.quantity}`);
     dataManager.updateInventory(this.#inventory);

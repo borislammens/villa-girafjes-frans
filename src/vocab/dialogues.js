@@ -9,6 +9,7 @@ export const DIALOGUES = [
   // Contact 1: iemand groeten en afscheid nemen (naar de dialoog "Salut!" uit het boek)
   {
     contact: 1,
+    id: 'c1-bonjour',
     says: 'Bonjour!',
     hint: 'Goedendag!',
     question: 'Groet terug en vraag hoe het gaat.',
@@ -17,6 +18,7 @@ export const DIALOGUES = [
   },
   {
     contact: 1,
+    id: 'c1-cava',
     says: 'Ça va?',
     hint: 'Gaat het?',
     question: 'Zeg: ja, het gaat.',
@@ -25,6 +27,7 @@ export const DIALOGUES = [
   },
   {
     contact: 1,
+    id: 'c1-comment',
     says: 'Comment ça va?',
     hint: 'Hoe gaat het?',
     question: 'Zeg dat het goed gaat en vraag: en jij?',
@@ -33,6 +36,7 @@ export const DIALOGUES = [
   },
   {
     contact: 1,
+    id: 'c1-moi',
     says: 'Ça va bien! Et toi?',
     hint: 'Het gaat goed! En met jou?',
     question: 'Zeg: ik? Heel goed.',
@@ -49,6 +53,7 @@ export const DIALOGUES = [
   },
   {
     contact: 1,
+    id: 'c1-aurevoir',
     says: 'Au revoir!',
     hint: 'Tot ziens!',
     question: 'Neem afscheid: tot binnenkort!',
@@ -57,6 +62,7 @@ export const DIALOGUES = [
   },
   {
     contact: 1,
+    id: 'c1-demain',
     says: 'À demain!',
     hint: 'Tot morgen!',
     question: 'Zeg: nee, tot vanavond!',
@@ -66,6 +72,7 @@ export const DIALOGUES = [
   // Contact 2: vragen en zeggen waar iemand naartoe gaat (naar de dialoog "Ils vont où?")
   {
     contact: 2,
+    id: 'c2-tuvas',
     says: 'Salut! Tu vas où?',
     hint: 'Hallo! Waar ga jij naartoe?',
     question: 'Zeg dat je naar de winkel gaat.',
@@ -74,6 +81,7 @@ export const DIALOGUES = [
   },
   {
     contact: 2,
+    id: 'c2-adam',
     says: 'Voilà Adam. Il va où?',
     hint: 'Daar is Adam. Waar gaat hij naartoe?',
     question: 'Zeg dat hij naar het huis van Thomas gaat.',
@@ -107,6 +115,7 @@ export const DIALOGUES = [
   // Contact 3: vragen en zeggen waar iemand zich bevindt (naar de dialoog "Vous êtes là?")
   {
     contact: 3,
+    id: 'c3-tuesou',
     says: 'Tu es où?',
     hint: 'Waar ben je?',
     question: 'Zeg: ik ben hier.',
@@ -115,6 +124,7 @@ export const DIALOGUES = [
   },
   {
     contact: 3,
+    id: 'c3-ouca',
     says: 'Où ça?',
     hint: 'Waar dan?',
     question: 'Zeg: in de woonkamer.',
@@ -139,6 +149,7 @@ export const DIALOGUES = [
   },
   {
     contact: 3,
+    id: 'c3-vousetesla',
     says: 'Vous êtes là?',
     hint: 'Zijn jullie daar?',
     question: 'Zeg: ja, wij zijn hier! En vraag waarom.',
@@ -147,6 +158,7 @@ export const DIALOGUES = [
   },
   {
     contact: 3,
+    id: 'c3-diner',
     says: 'Le dîner est prêt!',
     hint: 'Het avondeten is klaar!',
     question: 'Zeg: een ogenblikje, papa.',
@@ -156,6 +168,7 @@ export const DIALOGUES = [
   // Contact 4: verjaardag, geschenk, verwondering en bedanken (naar de dialoog "Tu as de la chance")
   {
     contact: 4,
+    id: 'c4-anniv',
     says: "Aujourd'hui, c'est mon anniversaire!",
     hint: 'Vandaag is het mijn verjaardag!',
     question: 'Wens een gelukkige verjaardag.',
@@ -164,6 +177,7 @@ export const DIALOGUES = [
   },
   {
     contact: 4,
+    id: 'c4-cadeau',
     says: 'Merci!',
     hint: 'Dank je!',
     question: 'Zeg: ik heb een geschenk voor jou.',
@@ -217,5 +231,16 @@ export const DIALOGUES = [
     question: 'Toon je verwondering: zeg dat je heel blij bent.',
     options: ['Ça alors! Je suis très content.', 'Ça va? Je suis très content.', 'Non, merci.', 'À demain! Je suis prêt.'],
     reply: 'Bon anniversaire!',
+  },
+  // Only used in the story: the shop of Madame Dupont
+  {
+    id: 'shop-cadeau',
+    storyOnly: true,
+    contact: 4,
+    says: 'Un cadeau? Voilà: un ticket de cinéma!',
+    hint: 'Een geschenk? Alsjeblieft: een bioscoopticket!',
+    question: 'Zeg: dank je wel!',
+    options: ['Merci beaucoup!', 'Bonne chance!', "C'est qui?", 'Où ça?'],
+    reply: 'De rien! Bonne fête!',
   },
 ];

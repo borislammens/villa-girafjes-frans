@@ -3,7 +3,9 @@ import { SCENE_KEYS } from './scene-keys.js';
 import { BaseScene } from './base-scene.js';
 import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
-import { makeQuestion, recordAnswer } from '../vocab/quiz.js';
+import { makeListenQuestion, makeQuestion, recordAnswer } from '../vocab/quiz.js';
+import { applyNextQuestionHelpers, itemBoosts } from '../items/item-effects.js';
+import { ITEM_EFFECT } from '../types/typedef.js';
 import { canSpeakFrench, speakFrench, stopSpeaking } from '../vocab/speech.js';
 
 /**
@@ -59,6 +61,10 @@ export class QuizScene extends BaseScene {
   #listenKey;
   /** @type {Phaser.GameObjects.Container | undefined} */
   #listenButton;
+  /** @type {boolean} */
+  #slowListen = false;
+  /** @type {number} space/enter are ignored until this time, so a fast key press for the dialog does not pick an answer */
+  #readyAt = 0;
 
   constructor() {
     super({ key: SCENE_KEYS.QUIZ_SCENE });
@@ -78,7 +84,19 @@ export class QuizScene extends BaseScene {
   create() {
     super.create();
     const { width, height } = this.scale;
-    this.#question = this.#sceneData.question || makeQuestion();
+    this.#slowListen = false;
+    this.#readyAt = this.time.now + 600;
+    let showAnswer = false;
+    if (this.#sceneData.question) {
+      this.#question = this.#sceneData.question;
+    } else {
+      // items from the bag (verrekijker, spiekbriefje, koptelefoon) help with this battle question
+      const wantsListening = itemBoosts.nextQuestion.has(ITEM_EFFECT.SLOW_LISTEN);
+      const helped = applyNextQuestionHelpers(wantsListening ? makeListenQuestion() : makeQuestion());
+      this.#question = helped.question;
+      showAnswer = helped.showAnswer;
+      this.#slowListen = helped.slowListen;
+    }
 
     this.add.rectangle(0, 0, width, height, 0x000000, 0.55).setOrigin(0);
     const panelW = 900;
@@ -172,6 +190,12 @@ export class QuizScene extends BaseScene {
         this.#answer(i);
       });
       this.#buttons.push({ bg, text });
+      if (showAnswer && i === this.#question.correctIndex) {
+        this.add
+          .text(x + btnW - 8, y + 6, '📝', { fontFamily: WORD_FONT, fontSize: '26px' })
+          .setOrigin(1, 0);
+        bg.setStrokeStyle(6, 0x2e7d32);
+      }
     });
 
     this.#feedbackText = this.add
@@ -232,6 +256,7 @@ export class QuizScene extends BaseScene {
       }
     }
     if (this._controls.wasSpaceKeyPressed() || this._controls.wasEnterKeyPressed()) {
+      if (this.time.now < this.#readyAt) return;
       this.#answer(this.#selected);
       return;
     }
@@ -292,7 +317,7 @@ export class QuizScene extends BaseScene {
 
   #listen() {
     const text = this.#answered ? this.#question.speakAfter || this.#question.speak : this.#question.speak;
-    if (text) speakFrench(text);
+    if (text) speakFrench(text, this.#slowListen ? { rate: 0.55 } : undefined);
   }
 
   #praise() {

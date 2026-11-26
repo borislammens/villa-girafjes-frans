@@ -1,3 +1,5 @@
+import { addTitleCodeButton, askCodeOverlay } from '../save/code-ui.js';
+import { loadSaveCode } from '../save/save-game.js';
 import Phaser from '../lib/phaser.js';
 import { SCENE_KEYS } from './scene-keys.js';
 import { AUDIO_ASSET_KEYS, EXTERNAL_LINKS_ASSET_KEYS, TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
@@ -128,6 +130,26 @@ export class TitleScene extends BaseScene {
       },
       targets: this.#mainMenuCursorPhaserImageGameObject,
     });
+
+    // load a game from another computer with a bewaarcode
+    const codeButton = addTitleCodeButton(() => {
+      this._controls.lockInput = true;
+      this.input.keyboard.enabled = false;
+      askCodeOverlay(
+        (code) => {
+          if (!loadSaveCode(this, code)) return false;
+          codeButton.remove();
+          this.input.keyboard.enabled = true;
+          this.scene.start(SCENE_KEYS.WORLD_SCENE);
+          return true;
+        },
+        () => {
+          this.input.keyboard.enabled = true;
+          this._controls.lockInput = false;
+        }
+      );
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => codeButton.remove());
 
     // with a saved game, start on "Verder spelen" so a new game is never started by accident
     if (this.#isContinueButtonEnabled) {

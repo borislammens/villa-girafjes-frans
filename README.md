@@ -9,9 +9,30 @@ Je wandelt rond met je monster. In een gevecht val je pas aan als je een vraag j
 - **Lidwoorden**: le, la, l', un, une (Contact 3).
 - **Gesprekjes**: de mensen in het dorp (Héléna, Adam, Séverine...) spreken je aan in het Frans, naar de dialogen uit het boek, en jij kiest het juiste antwoord.
 - **Luisteren**: de computer leest Franse woorden en zinnen voor. Soms krijg je een "Wat hoor je?"-vraag.
-- **Zeg me na**: zeg Franse woorden luidop na (knop op het startscherm, of praat met Léa). Hier kan je niets fout doen: elke poging levert sterren op.
+- **Zeg me na**: zeg Franse woorden luidop na (knop op het startscherm, of praat met Sacha). Hier kan je niets fout doen: elke poging levert sterren op.
 
 - **Kermis**: open de kermis via het menu (ENTER) of praat met Hugo. Drie kramen: blikken gooien naar het juiste Franse woord, memory (Frans en Nederlands koppelen) en eendjes vissen met le/la/l'/un/une. Elke 10 sterren levert een prijs op in je tas (een drankje of een bal).
+
+## Het verhaal: de verjaardag van juf Annelies
+
+Vier hoofdstukken, één per Contact. Linksboven staat altijd wat je nog moet doen.
+
+1. **Salut!** Begroet Héléna, Adam en Séverine in het dorp.
+2. **Ils vont où?** Professor Girafe geeft je een monster. Versla de woordjesdief bij het hek en vraag Nabil in de stad waar iedereen heen gaat.
+3. **Vous êtes là?** Zoek papa (groot huis links in de stad) en Sacha, en versla de woordjesdief in het gras.
+4. **Tu as de la chance** Koop een cadeau bij Madame Dupont (huis naast het jouwe) en geef het aan juf Annelies bij de kermis.
+
+In de verhaalgesprekken moet je juist antwoorden. Fout? Dan zegt het personage "probeer nog eens" en praat je gewoon opnieuw.
+Een nieuw hoofdstuk opent pas als je ook **20 sterren** verdiend hebt in het huidige hoofdstuk (kermis of Zeg me na). Sterren uitgeven telt niet mee.
+
+## Winkel en tas
+
+Bij Madame Dupont koop je spullen met sterren: drankje, croissant, pain au chocolat (genezen), oude bal, vlindernet, gouden vlindernet (vangen), verrekijker (2 foute antwoorden weg), spiekbriefje (juiste antwoord groen omrand), koptelefoon (vraag traag voorgelezen), toverkrijtje (volgende fout telt niet), fluitje (100 stappen geen wilde woordjesdieven) en kompas (waar moet ik naartoe?).
+Wie in totaal **500 sterren** verdiend heeft, krijgt de **sleutel tot de school**. Die opent het geheime huisje in het dorp...
+
+## Bewaren en de bewaarcode
+
+Het spel bewaart vanzelf in de browser. Op een andere computer verder spelen? Kies ENTER > BEWAARCODE en schrijf de code op (bijvoorbeeld `GIRAF-6Q01W-H1DAA-000JG-7HZ03-PZ`). Op de andere computer klik je in het beginscherm op **Ik heb een bewaarcode**. Er gaat niets online: geen namen, geen wachtwoorden.
 
 Fout antwoord? Dan valt het wilde monster aan en zie je het juiste antwoord. Woordjes die je fout had, komen vaker terug.
 
@@ -25,7 +46,7 @@ Bij de start kies je welke Contacts je wil oefenen.
 | Spatie | Bevestigen |
 | 1 tot 4 of klikken | Antwoord kiezen in een vraag |
 | Shift | Terug |
-| Enter | Menu (kermis, tas, bewaren) |
+| Enter | Menu (kermis, tas, bewaren, bewaarcode) |
 | Klik / tik | Berichten verder zetten, antwoorden kiezen |
 | L | Luisteren (Frans voorlezen) |
 | F | Volledig scherm |

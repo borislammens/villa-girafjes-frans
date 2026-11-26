@@ -32,10 +32,11 @@ export function calculateMinValueForCapture(monster) {
 
 /**
  * @param {BattleMonster} monster
+ * @param {number} [bonus=0] makes catching easier (vlindernet)
  * @returns {CaptureMonsterResults}
  */
-export function calculateMonsterCaptureResults(monster) {
-  const minValueRequiredForCapture = calculateMinValueForCapture(monster);
+export function calculateMonsterCaptureResults(monster, bonus = 0) {
+  const minValueRequiredForCapture = Math.max(0, calculateMinValueForCapture(monster) - bonus);
   const randomValue = Phaser.Math.Between(0, 100);
   return {
     requiredCaptureValue: minValueRequiredForCapture,
