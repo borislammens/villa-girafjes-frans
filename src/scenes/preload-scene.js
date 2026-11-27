@@ -151,6 +151,7 @@ export class PreloadScene extends BaseScene {
     this.load.spritesheet(VILLA_ASSET_KEYS.CARDS, `${villa}/cards.png`, { frameWidth: 200, frameHeight: 112 });
     this.load.image(VILLA_ASSET_KEYS.WATER, `${villa}/water.png`);
     this.load.image(VILLA_ASSET_KEYS.CLASSROOM, `${villa}/classroom.png`);
+    this.load.image(VILLA_ASSET_KEYS.SCHOOL, `${villa}/school.png`);
 
     this.load.spritesheet(ATTACK_ASSET_KEYS.ICE_SHARD, `${pimenAssetPath}/ice-attack/active.png`, {
       frameWidth: 32,
@@ -208,6 +209,13 @@ export class PreloadScene extends BaseScene {
       'assets/images/villa/papa-interior.png'
     );
     this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_2_LEVEL, `assets/data/building_2.json`);
+    // the school in the town (was a 24-hour shop on the original map), with a classroom inside
+    this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_4_LEVEL, `assets/data/building_4.json`);
+    this.load.image(BUILDING_ASSET_KEYS.BUILDING_4_BACKGROUND, 'assets/images/villa/school-interior.png');
+    this.load.image(
+      BUILDING_ASSET_KEYS.BUILDING_4_FOREGROUND,
+      `${monsterTamerAssetPath}/map/buildings/building_3_level_foreground.png`
+    );
 
     this.load.image(WORLD_ASSET_KEYS.FOREST_1_BACKGROUND, `${monsterTamerAssetPath}/map/forest_1_level_background.png`);
     this.load.image(WORLD_ASSET_KEYS.FOREST_1_FOREGROUND, `${monsterTamerAssetPath}/map/forest_1_level_foreground.png`);

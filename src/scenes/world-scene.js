@@ -21,6 +21,7 @@ import {
   EXTRA_NPCS,
   SECRET_HOUSE,
   MOVED_MAP_ITEMS,
+  TOWN_SCHOOL,
   STORY_FLAGS,
   STORY_GATES,
   THIEF_FLAGS,
@@ -284,6 +285,9 @@ export class WorldScene extends BaseScene {
 
     // the secret little house (only the "sleutel tot de school" opens it)
     this.#createSecretHouse();
+    if (this.#sceneData.area === TOWN_SCHOOL.area) {
+      this.add.image(TOWN_SCHOOL.x, TOWN_SCHOOL.y, VILLA_ASSET_KEYS.SCHOOL).setOrigin(0).setDepth(1);
+    }
 
     // create items and collisions
     this.#createItems(map);

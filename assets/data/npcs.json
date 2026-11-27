@@ -803,5 +803,54 @@
         }
       }
     ]
+  },
+  "14": {
+    "frame": 60,
+    "animationKeyPrefix": "NPC_7",
+    "events": [
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Bonjour! Ik ben meester Pierre. Welkom in de school van de stad!",
+            "Juf Annelies geeft hier ook les. Ze staat vaak buiten bij de deur."
+          ]
+        }
+      },
+      {
+        "requires": [],
+        "type": "FRENCH_CHAT",
+        "data": {
+          "name": "Meester Pierre"
+        }
+      },
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "Très bien! Wil je nog oefenen? Zeg me na! Elk goed woord is een ster waard.",
+            "(Wie in totaal 500 sterren verdient, krijgt de sleutel tot de school...)"
+          ]
+        }
+      },
+      {
+        "requires": [],
+        "type": "REPEAT_GAME",
+        "data": {
+          "name": "Meester Pierre"
+        }
+      },
+      {
+        "requires": [],
+        "type": "MESSAGE",
+        "data": {
+          "messages": [
+            "À bientôt! Tot de volgende les."
+          ]
+        }
+      }
+    ]
   }
 }

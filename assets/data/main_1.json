@@ -1675,6 +1675,34 @@
                 {
                  "gid":194,
                  "height":64,
+                 "id":62,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"connects_to",
+                         "type":"string",
+                         "value":"building_4"
+                        }, 
+                        {
+                         "name":"entrance_id",
+                         "type":"string",
+                         "value":"1"
+                        }, 
+                        {
+                         "name":"is_building",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "type":"entrance",
+                 "visible":true,
+                 "width":64,
+                 "x":1664,
+                 "y":1984
+                }, 
+                {
+                 "gid":194,
+                 "height":64,
                  "id":33,
                  "name":"",
                  "properties":[
@@ -2469,7 +2497,7 @@
          "y":0
         }],
  "nextlayerid":41,
- "nextobjectid":62,
+ "nextobjectid":63,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.0",

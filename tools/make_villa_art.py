@@ -571,6 +571,159 @@ def make_papa_interior():
     img.save(OUT + 'papa-interior.png')
 
 
+# a tiny 3x5 pixel font for signs
+FONT3 = {
+    'E': ['###', '#..', '##.', '#..', '###'], 'C': ['###', '#..', '#..', '#..', '###'], 'O': ['###', '#.#', '#.#', '#.#', '###'],
+    'L': ['#..', '#..', '#..', '#..', '###'], 'É': ['.#.', '###', '##.', '#..', '###'],
+}
+
+
+def pixel_text(d, x, y, text, col):
+    for ch in text:
+        for ry, row in enumerate(FONT3[ch]):
+            for rx, c in enumerate(row):
+                if c == '#':
+                    d.point((x + rx, y + ry), fill=col)
+        x += 4
+
+
+SCHOOL_BOX = (22 * 64, 25 * 64, 31 * 64, 32 * 64)
+
+
+def make_school():
+    """the town school (école) on the place of the original 24-hour shop of the map"""
+    c = map_crop(SCHOOL_BOX)
+    store = cut_out(c, (4 * 64, 3 * 64))
+    # where the shop was: its bounding box inside the crop
+    W, H = c.size
+    px = c.load()
+    mask = Image.new('L', c.size, 0)
+    mp = mask.load()
+    # mark the shop pixels again (same flood fill as cut_out, but keep the position)
+    from collections import deque
+    seed = (4 * 64, 3 * 64)
+    q = deque([seed])
+    mp[seed] = 255
+    while q:
+        x, y = q.popleft()
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < W and 0 <= ny < H and mp[nx, ny] == 0 and not is_grass(px[nx, ny]):
+                mp[nx, ny] = 255
+                q.append((nx, ny))
+    x0, y0, x1, y1 = mask.getbbox()
+    # the school, drawn at 16 px per tile and scaled up 4 times
+    lw, lh = (x1 - x0 + 3) // 4, (y1 - y0 + 3) // 4
+    lo = Image.new('RGBA', (lw, lh), (0, 0, 0, 0))
+    d = ImageDraw.Draw(lo)
+    wall_top = 26
+    # roof
+    for y in range(4, wall_top):
+        inset = max(0, (wall_top - y) // 3)
+        for x in range(1 + inset, lw - 1 - inset):
+            col = PAL['r'] if (y // 3 + (x // 4)) % 2 == 0 or y % 3 else (184, 56, 48)
+            d.point((x, y), fill=col)
+        d.point((1 + inset, y), fill=PAL['k'])
+        d.point((lw - 2 - inset, y), fill=PAL['k'])
+    d.line((1 + (wall_top - 4) // 3, 4, lw - 2 - (wall_top - 4) // 3, 4), fill=PAL['k'])
+    # bell tower with a golden bell
+    bx = lw // 2
+    d.rectangle((bx - 6, 0, bx + 5, 12), fill=PAL['k'])
+    d.rectangle((bx - 5, 1, bx + 4, 11), fill=(244, 228, 180))
+    d.rectangle((bx - 3, 3, bx + 2, 8), fill=(96, 64, 40))
+    d.rectangle((bx - 2, 4, bx + 1, 7), fill=PAL['y'])
+    d.point((bx - 1, 8), fill=PAL['Y'])
+    # walls
+    d.rectangle((2, wall_top, lw - 3, lh - 6), fill=(244, 228, 180))
+    for y in range(wall_top + 3, lh - 6, 4):
+        d.line((3, y, lw - 4, y), fill=(232, 212, 160))
+    d.rectangle((1, wall_top, 2, lh - 6), fill=PAL['k'])
+    d.rectangle((lw - 3, wall_top, lw - 2, lh - 6), fill=PAL['k'])
+    d.line((2, wall_top, lw - 3, wall_top), fill=PAL['k'])
+    d.rectangle((1, lh - 6, lw - 2, lh - 3), fill=PAL['s'])
+    d.line((1, lh - 3, lw - 2, lh - 3), fill=PAL['k'])
+    # sign ÉCOLE with a clock above the door
+    door_l = (64 * 3 + 30 - x0) // 4
+    door_r = (64 * 5 + 20 - x0) // 4
+    mid = (door_l + door_r) // 2
+    d.rectangle((mid - 12, wall_top + 3, mid + 11, wall_top + 11), fill=PAL['k'])
+    d.rectangle((mid - 11, wall_top + 4, mid + 10, wall_top + 10), fill=(48, 96, 160))
+    pixel_text(d, mid - 9, wall_top + 5, 'ÉCOLE', PAL['w'])
+    d.ellipse((mid - 4, 13, mid + 4, 21), fill=PAL['w'], outline=PAL['k'])
+    d.line((mid, 17, mid, 14), fill=PAL['k'])
+    d.line((mid, 17, mid + 2, 17), fill=PAL['k'])
+    # double door
+    d.rectangle((door_l, wall_top + 14, door_r, lh - 6), fill=PAL['k'])
+    d.rectangle((door_l + 1, wall_top + 15, door_r - 1, lh - 6), fill=(64, 112, 176))
+    d.line(((door_l + door_r) // 2, wall_top + 15, (door_l + door_r) // 2, lh - 6), fill=PAL['k'])
+    d.rectangle((door_l + 3, wall_top + 18, (door_l + door_r) // 2 - 3, wall_top + 24), fill=PAL['c'])
+    d.rectangle(((door_l + door_r) // 2 + 3, wall_top + 18, door_r - 3, wall_top + 24), fill=PAL['c'])
+    # windows on both sides of the door
+    for wx in list(range(6, door_l - 12, 16)) + list(range(door_r + 6, lw - 16, 16)):
+        d.rectangle((wx, wall_top + 12, wx + 11, wall_top + 26), fill=PAL['k'])
+        d.rectangle((wx + 1, wall_top + 13, wx + 10, wall_top + 25), fill=PAL['c'])
+        d.line((wx + 5, wall_top + 13, wx + 5, wall_top + 25), fill=PAL['w'])
+        d.line((wx + 1, wall_top + 19, wx + 10, wall_top + 19), fill=PAL['w'])
+        d.line((wx + 2, wall_top + 14, wx + 3, wall_top + 14), fill=PAL['w'])
+        d.rectangle((wx - 1, wall_top + 27, wx + 12, wall_top + 28), fill=PAL['n'])
+    school = up(lo).crop((0, 0, x1 - x0, y1 - y0))
+    # grass where the shop was but the school is not, so nothing of the shop shows through
+    tile = map_tile(28, 60)
+    out = Image.new('RGBA', (x1 - x0, y1 - y0), (0, 0, 0, 0))
+    op = out.load()
+    tp = tile.load()
+    for y in range(y1 - y0):
+        for x in range(x1 - x0):
+            if mp[x + x0, y + y0]:
+                op[x, y] = tp[(x + x0) % 64, (y + y0) % 64]
+    out.alpha_composite(school)
+    out.save(OUT + 'school.png')
+    print('school at', SCHOOL_BOX[0] + x0, SCHOOL_BOX[1] + y0, out.size)
+
+
+def make_classroom_interior():
+    """inside the school: blackboard, bookshelves, a teacher's desk and pupils' chairs (same layout as the original room)"""
+    img = Image.open(BUILDINGS + 'building_3_level_background.png').convert('RGBA')
+    W, H = img.size
+    plank = lambda x, y: (220, 180, 128) if (y // 16) % 2 == 0 else (208, 168, 120)
+    recolor(img, {(205, 187, 171): plank, (166, 133, 143): (160, 120, 80)}, (0, 160, W, H))
+    recolor(img, {(176, 208, 126): (200, 216, 232), (102, 170, 93): (150, 172, 200)}, (0, 160, W, H))
+    recolor(img, {(166, 133, 143): (236, 210, 150), (205, 187, 171): (248, 236, 200)}, (0, 0, W, 160))
+    # the glass table becomes the wooden desk of the teacher
+    recolor(img, {(196, 199, 238): (176, 120, 72), (252, 252, 252): (208, 152, 96), (154, 143, 224): (144, 96, 56)}, (384, 224, 512, 356))
+    d = ImageDraw.Draw(img)
+    # blackboard instead of the TV, with chalk words
+    d.rectangle((384, 36, 511, 128), fill=PAL['k'])
+    d.rectangle((388, 40, 507, 124), fill=PAL['n'])
+    d.rectangle((392, 44, 503, 116), fill=(48, 92, 64))
+    pixel = lambda x, y, w: d.rectangle((x, y, x + w, y + 3), fill=(236, 240, 236))
+    for row, widths in ((52, (28, 20, 36)), (68, (40, 24)), (84, (16, 32, 28)), (100, (24, 44))):
+        x = 400
+        for w in widths:
+            pixel(x, row, w)
+            x += w + 8
+    d.rectangle((396, 118, 499, 122), fill=PAL['N'])
+    # books on the shelves
+    colors = [PAL['r'], PAL['b'], PAL['g'], PAL['y'], PAL['v'], PAL['o']]
+    n = 0
+    for sx in (320, 516):
+        for sy in (66, 102, 138):
+            x = sx + 6
+            while x < sx + 54:
+                h = 14 + (n % 3) * 2
+                d.rectangle((x, sy + 18 - h, x + 5, sy + 18), fill=PAL['k'])
+                d.rectangle((x + 1, sy + 19 - h, x + 4, sy + 17), fill=colors[n % len(colors)])
+                x += 7
+                n += 1
+    # an apple and a globe for the teacher
+    d.ellipse((470, 236, 490, 256), fill=PAL['r'], outline=PAL['k'], width=2)
+    d.line((480, 236, 482, 230), fill=PAL['N'], width=2)
+    d.ellipse((128, 60, 168, 100), fill=PAL['b'], outline=PAL['k'], width=3)
+    d.rectangle((136, 70, 150, 82), fill=PAL['g'])
+    d.rectangle((146, 100, 150, 112), fill=PAL['k'])
+    img.save(OUT + 'school-interior.png')
+
+
 if __name__ == '__main__':
     make_secret_house()
     make_item_icons()
@@ -583,4 +736,6 @@ if __name__ == '__main__':
     make_classroom()
     make_shop_interior()
     make_papa_interior()
+    make_school()
+    make_classroom_interior()
     print('ok')
