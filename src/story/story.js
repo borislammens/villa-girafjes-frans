@@ -23,7 +23,7 @@ export const STORY_FLAGS = Object.freeze({
 });
 
 /** stars a child must earn in a chapter before the next chapter opens */
-export const STARS_PER_CHAPTER = 20;
+export const STARS_PER_CHAPTER = 35;
 
 /** NPC ids of the woordjesdieven (trainer battles) and the flag they set when beaten */
 export const THIEF_FLAGS = Object.freeze({ 4: STORY_FLAGS.THIEF1, 5: STORY_FLAGS.THIEF2, 9: STORY_FLAGS.THIEF3 });

@@ -6,7 +6,8 @@
 import { STORY_FLAGS } from '../story/story.js';
 
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'; // Crockford base32: no I, L, O, U
-const VERSION = 1;
+/** version 2 keeps the chapter stars in 6 bits (35 stars per chapter); version 1 codes (5 bits) still load */
+const VERSION = 2;
 const PREFIX = 'GIRAF';
 
 /** story flags, in a fixed order */
@@ -116,7 +117,7 @@ export function encodeSaveCode(d) {
   });
   w.write(d.stars, 12);
   w.write(d.earned, 13);
-  w.write(d.chapterStars, 5);
+  w.write(d.chapterStars, 6);
   CODE_DEFEATED.forEach((id) => w.write(d.defeated.includes(id) ? 1 : 0, 1));
   CODE_PICKED_ITEMS.forEach((id) => w.write(d.picked.includes(id) ? 1 : 0, 1));
   CODE_EVENTS.forEach((id) => w.write(d.viewed.includes(id) ? 1 : 0, 1));
@@ -152,7 +153,8 @@ export function decodeSaveCode(code) {
   }
   try {
     const r = new BitReader(bits);
-    if (r.read(3) !== VERSION) return undefined;
+    const version = r.read(3);
+    if (version !== 1 && version !== 2) return undefined;
     const flags = CODE_FLAGS.filter(() => r.read(1) === 1);
     const contacts = [1, 2, 3, 4].filter(() => r.read(1) === 1);
     const n = r.read(3);
@@ -165,7 +167,7 @@ export function decodeSaveCode(code) {
     });
     const stars = r.read(12);
     const earned = r.read(13);
-    const chapterStars = r.read(5);
+    const chapterStars = r.read(version === 1 ? 5 : 6);
     const defeated = CODE_DEFEATED.filter(() => r.read(1) === 1);
     const picked = CODE_PICKED_ITEMS.filter(() => r.read(1) === 1);
     const viewed = CODE_EVENTS.filter(() => r.read(1) === 1);

@@ -23,7 +23,7 @@ Vier hoofdstukken, één per Contact. Linksboven staat altijd wat je nog moet do
 4. **Tu as de la chance** Koop een cadeau bij Madame Dupont (huis naast het jouwe) en geef het aan juf Annelies bij de kermis.
 
 In de verhaalgesprekken moet je juist antwoorden. Fout? Dan zegt het personage "probeer nog eens" en praat je gewoon opnieuw.
-Een nieuw hoofdstuk opent pas als je ook **20 sterren** verdiend hebt in het huidige hoofdstuk (kermis of Zeg me na). Sterren uitgeven telt niet mee.
+Een nieuw hoofdstuk opent pas als je ook **35 sterren** verdiend hebt in het huidige hoofdstuk (kermis of Zeg me na). Sterren uitgeven telt niet mee.
 
 ## Winkel en tas
 
@@ -36,7 +36,7 @@ Het spel bewaart vanzelf in de browser. Op een andere computer verder spelen? Ki
 
 Fout antwoord? Dan valt het wilde monster aan en zie je het juiste antwoord. Woordjes die je fout had, komen vaker terug.
 
-Bij de start kies je welke Contacts je wil oefenen.
+Er is geen Contact-keuze meer bij de start: elk hoofdstuk van het verhaal hoort bij een Contact, en de vragen gaan over dat Contact en de vorige.
 
 ## Bediening
 

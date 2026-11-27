@@ -173,7 +173,8 @@ export class TitleScene extends BaseScene {
         dataManager.startNewGame();
       }
 
-      this.scene.start(SCENE_KEYS.CONTACT_SELECT_SCENE);
+      // no Contact choice any more: the chapters of the story decide which Contact is asked
+      this.scene.start(SCENE_KEYS.WORLD_SCENE);
     });
 
     // play background music

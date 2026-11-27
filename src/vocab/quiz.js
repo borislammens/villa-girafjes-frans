@@ -55,12 +55,11 @@ export function setStoryMaxContact(n) {
 }
 
 /**
- * The Contacts used for questions now: the chosen ones, but never beyond the chapter of the story.
+ * The Contacts used for questions now: every Contact up to the chapter of the story.
+ * (The Contact choice at the start is gone: the chapters decide. An old saved choice is ignored.)
  * @returns {number[]}
  */
 export function getActiveContacts() {
-  const chosen = getSelectedContacts().filter((c) => c <= storyMaxContact);
-  if (chosen.length > 0) return chosen;
   return [1, 2, 3, 4].filter((c) => c <= storyMaxContact);
 }
 
