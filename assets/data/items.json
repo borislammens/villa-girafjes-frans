@@ -11,5 +11,5 @@
   { "id": 10, "name": "toverkrijtje", "description": "In een gevecht: je volgende fout wordt weggetoverd.", "category": "BATTLE_HELP", "effect": "FORGIVE_MISTAKE", "price": 20 },
   { "id": 11, "name": "fluitje", "description": "Fluit! 100 stappen lang durven wilde woordjesdieven niet te komen.", "category": "WORLD", "effect": "REPEL_100", "price": 15 },
   { "id": 12, "name": "kompas", "description": "Wijst je de weg naar je volgende taak. Raakt nooit op.", "category": "WORLD", "effect": "COMPASS", "price": 30, "keep": true },
-  { "id": 13, "name": "sleutel tot de school", "description": "Gekregen voor 500 verdiende sterren! Wat zou die openen...?", "category": "WORLD", "effect": "SCHOOL_KEY", "keep": true }
+  { "id": 13, "name": "gouden sleutel", "description": "Gekregen voor 500 verdiende sterren! Wat zou die openen...?", "category": "WORLD", "effect": "SCHOOL_KEY", "keep": true }
 ]

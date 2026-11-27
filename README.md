@@ -28,7 +28,7 @@ Een nieuw hoofdstuk opent pas als je ook **20 sterren** verdiend hebt in het hui
 ## Winkel en tas
 
 Bij Madame Dupont koop je spullen met sterren: drankje, croissant, pain au chocolat (genezen), oude bal, vlindernet, gouden vlindernet (vangen), verrekijker (2 foute antwoorden weg), spiekbriefje (juiste antwoord groen omrand), koptelefoon (vraag traag voorgelezen), toverkrijtje (volgende fout telt niet), fluitje (100 stappen geen wilde woordjesdieven) en kompas (waar moet ik naartoe?).
-Wie in totaal **500 sterren** verdiend heeft, krijgt de **sleutel tot de school**. Die opent het geheime huisje in het dorp...
+Wie in totaal **500 sterren** verdiend heeft, krijgt de **gouden sleutel**. Die opent het geheime huisje in het dorp...
 
 ## Bewaren en de bewaarcode
 

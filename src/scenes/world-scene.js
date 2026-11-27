@@ -283,7 +283,7 @@ export class WorldScene extends BaseScene {
     this.cameras.main.setZoom(0.8);
     this.add.image(0, 0, `${this.#sceneData.area.toUpperCase()}_BACKGROUND`, 0).setOrigin(0);
 
-    // the secret little house (only the "sleutel tot de school" opens it)
+    // the secret little house (only the "gouden sleutel" opens it)
     this.#createSecretHouse();
     if (this.#sceneData.area === TOWN_SCHOOL.area) {
       this.add.image(TOWN_SCHOOL.x, TOWN_SCHOOL.y, VILLA_ASSET_KEYS.SCHOOL).setOrigin(0).setDepth(1);
@@ -1656,7 +1656,7 @@ export class WorldScene extends BaseScene {
       dataManager.saveData();
       this.#dialogUi.showDialogModal([
         '⭐ WAUW! Je hebt al 500 sterren verdiend! ⭐',
-        'Je krijgt de sleutel tot de school! Hij zit in je tas.',
+        'Je krijgt de gouden sleutel! Hij zit in je tas.',
         'Er staat een geheim huisje in het dorp... Zou hij daar passen?',
       ]);
       return;
@@ -1734,8 +1734,8 @@ export class WorldScene extends BaseScene {
     if (!this.#hasItem(13)) {
       this.#dialogUi.showDialogModal([
         'Een geheim huisje! De deur zit op slot.',
-        'Op het slot staat: "Alleen voor wie de sleutel tot de school heeft."',
-        `De sleutel krijg je vanzelf als je in totaal ${KEY_STARS} sterren verdiend hebt. Jij hebt er nu ${Math.min(getStarsEarned(), KEY_STARS)}.`,
+        'Op het slot staat: "Alleen voor wie de gouden sleutel heeft."',
+        `De gouden sleutel krijg je vanzelf als je in totaal ${KEY_STARS} sterren verdiend hebt. Jij hebt er nu ${Math.min(getStarsEarned(), KEY_STARS)}.`,
         'Je ziet linksboven hoe ver je al bent. Verdien sterren op de kermis en met Zeg me na!',
       ]);
       return;
@@ -1765,7 +1765,7 @@ export class WorldScene extends BaseScene {
         break;
       case ITEM_EFFECT.SCHOOL_KEY:
         this.#dialogUi.showDialogModal([
-          '🔑 De sleutel tot de school! Hij glimt helemaal.',
+          '🔑 De gouden sleutel! Hij glimt helemaal.',
           'Er staat een geheim huisje in het dorp, rechts van de huizen. Zou hij daar passen...?',
         ]);
         break;

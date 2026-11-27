@@ -126,7 +126,7 @@ export function questText(flags, chapterStars = 0, key = undefined) {
   const idx = currentChapterIndex(flags);
   if (idx < 0) return '';
   // the key to the school: a long-term goal for all stars ever earned
-  const keyLine = key && !key.has ? `\n🔑 Sleutel tot de school: ⭐ ${Math.min(key.earned, KEY_STARS)}/${KEY_STARS}` : '';
+  const keyLine = key && !key.has ? `\n🔑 Gouden sleutel: ⭐ ${Math.min(key.earned, KEY_STARS)}/${KEY_STARS}` : '';
   if (idx >= CHAPTERS.length) return `🏆 Verhaal uitgespeeld!\nExtra: versla de grote woordjesdief in het noorden.${keyLine}`;
   const ch = CHAPTERS[idx];
   const lines = ch.goals.map((g) => `${flags.has(g.flag) ? '✔' : '○'} ${g.text}`);
@@ -204,7 +204,7 @@ export const EXTRA_NPCS = [
   { area: 'main_1', x: 21, y: 25, id: 13 }, // juf Annelies, bij de kermis
 ];
 
-/** The secret little house in the village: only the "sleutel tot de school" opens it. */
+/** The secret little house in the village: only the "gouden sleutel" opens it. */
 export const SECRET_HOUSE = Object.freeze({ area: 'main_1', x: 25, y: 78, w: 4, h: 2, doorX: 27, doorY: 79 });
 /** the school in the town, drawn over the 24-hour shop of the original map (pixel position of school.png) */
 export const TOWN_SCHOOL = Object.freeze({ area: 'main_1', x: 1492, y: 1652 });
