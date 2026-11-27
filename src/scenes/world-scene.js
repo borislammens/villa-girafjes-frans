@@ -30,6 +30,7 @@ import {
   nextChapterToOpen,
   nextGoalText,
   questText,
+  KEY_STARS,
 } from '../story/story.js';
 import { getChapterStars, getStarsEarned, startChapterStars } from '../carnival/carnival-ui.js';
 import { itemBoosts } from '../items/item-effects.js';
@@ -1640,13 +1641,13 @@ export class WorldScene extends BaseScene {
     setStoryMaxContact(chapter < 0 ? 1 : chapter + 1);
     const chapterStars = getChapterStars();
     const hud = /** @type {any} */ (this.scene.get(SCENE_KEYS.STORY_HUD_SCENE));
-    if (hud && hud.setText) hud.setText(questText(flags, chapterStars));
+    if (hud && hud.setText) hud.setText(questText(flags, chapterStars, { earned: getStarsEarned(), has: this.#hasItem(13) }));
 
     if (this.#isPlayerInputLocked() || this.#player.isMoving || this.#npcPlayerIsInteractingWith || this.#isProcessingCutSceneEvent) {
       return;
     }
     // 500 stars ever earned (spending does not count against it): the key to the school
-    if (getStarsEarned() >= 500 && !this.#hasItem(13)) {
+    if (getStarsEarned() >= KEY_STARS && !this.#hasItem(13)) {
       dataManager.addItem(DataUtils.getItem(this, 13), 1);
       dataManager.saveData();
       this.#dialogUi.showDialogModal([
@@ -1671,7 +1672,7 @@ export class WorldScene extends BaseScene {
     dataManager.addFlag(next.flag);
     startChapterStars();
     dataManager.saveData();
-    if (hud && hud.setText) hud.setText(questText(dataManager.getFlags(), 0));
+    if (hud && hud.setText) hud.setText(questText(dataManager.getFlags(), 0, { earned: getStarsEarned(), has: this.#hasItem(13) }));
     this.#dialogUi.showDialogModal(['🎉 Hoofdstuk klaar! Bravo!', ...next.intro]);
   }
 
@@ -1730,6 +1731,8 @@ export class WorldScene extends BaseScene {
       this.#dialogUi.showDialogModal([
         'Een geheim huisje! De deur zit op slot.',
         'Op het slot staat: "Alleen voor wie de sleutel tot de school heeft."',
+        `De sleutel krijg je vanzelf als je in totaal ${KEY_STARS} sterren verdiend hebt. Jij hebt er nu ${Math.min(getStarsEarned(), KEY_STARS)}.`,
+        'Je ziet linksboven hoe ver je al bent. Verdien sterren op de kermis en met Zeg me na!',
       ]);
       return;
     }

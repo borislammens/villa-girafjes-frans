@@ -485,6 +485,92 @@ def make_classroom():
     up(lo).save(OUT + 'classroom.png')
 
 
+BUILDINGS = 'assets/images/monster-tamer/map/buildings/'
+
+
+def recolor(img, mapping, box):
+    px = img.load()
+    x0, y0, x1, y1 = box
+    for y in range(y0, y1):
+        for x in range(x0, x1):
+            c = px[x, y][:3]
+            if c in mapping:
+                m = mapping[c]
+                px[x, y] = (m(x, y) if callable(m) else m) + (255,)
+
+
+def make_shop_interior():
+    """the shop of Madame Dupont: tiled floor, red carpet, bread on display, jars on the shelves, a blue and white awning"""
+    img = Image.open(BUILDINGS + 'building_2_level_background.png').convert('RGBA')
+    W, H = img.size
+    tile = lambda x, y: (236, 228, 204) if ((x // 32) + (y // 32)) % 2 == 0 else (200, 216, 232)
+    recolor(img, {(205, 187, 171): tile, (166, 133, 143): (150, 160, 176)}, (0, 160, W, H))
+    recolor(img, {(176, 208, 126): (216, 96, 88), (102, 170, 93): (160, 56, 56)}, (0, 160, W, H))
+    recolor(img, {(166, 133, 143): (120, 150, 200), (205, 187, 171): (236, 228, 204)}, (0, 0, W, 160))
+    d = ImageDraw.Draw(img)
+    # awning over the top of the wall
+    for x in range(64, 768, 32):
+        col = (48, 96, 160) if (x // 32) % 2 == 0 else (252, 252, 252)
+        d.rectangle((x, 28, x + 31, 52), fill=col)
+        d.rectangle((x + 4, 52, x + 27, 60), fill=col)
+    d.line((64, 28, 767, 28), fill=PAL['k'], width=4)
+    # bread on display instead of the TV
+    d.rectangle((384, 36, 511, 128), fill=PAL['k'])
+    d.rectangle((388, 40, 507, 124), fill=(152, 104, 64))
+    for y in (52, 88):
+        d.rectangle((392, y + 24, 503, y + 28), fill=(96, 64, 40))
+    for i, x in enumerate(range(396, 500, 36)):
+        d.rounded_rectangle((x, 56, x + 30, 74), radius=8, fill=(232, 176, 96), outline=PAL['k'], width=3)
+        d.line((x + 8, 60, x + 12, 68), fill=(200, 136, 64), width=3)
+        d.line((x + 18, 60, x + 22, 68), fill=(200, 136, 64), width=3)
+        d.pieslice((x, 92, x + 30, 120), 180, 360, fill=(232, 192, 128), outline=PAL['k'], width=3)
+    # jars on the shelves
+    colors = [PAL['r'], PAL['y'], PAL['g'], PAL['b'], PAL['o'], PAL['p']]
+    n = 0
+    for sx in (320, 516):
+        for sy in (68, 104, 140):
+            for jx in range(sx + 8, sx + 56, 16):
+                d.rectangle((jx, sy, jx + 11, sy + 14), fill=PAL['k'])
+                d.rectangle((jx + 2, sy + 2, jx + 9, sy + 12), fill=colors[n % len(colors)])
+                d.rectangle((jx + 2, sy + 2, jx + 9, sy + 4), fill=PAL['w'])
+                n += 1
+    # a cash register on the desk at the left
+    d.rectangle((128, 60, 184, 100), fill=PAL['k'])
+    d.rectangle((132, 64, 180, 96), fill=(200, 152, 40))
+    d.rectangle((140, 70, 172, 80), fill=(152, 208, 248))
+    img.save(OUT + 'shop-interior.png')
+
+
+def make_papa_interior():
+    """the house of papa in the town: warm wooden floor, blue rug, green wallpaper, paintings and plants"""
+    img = Image.open(BUILDINGS + 'building_3_level_background.png').convert('RGBA')
+    W, H = img.size
+    plank = lambda x, y: (196, 140, 96) if (y // 16) % 2 == 0 else (184, 128, 88)
+    recolor(img, {(205, 187, 171): plank, (166, 133, 143): (128, 84, 56)}, (0, 160, W, H))
+    recolor(img, {(176, 208, 126): (120, 160, 216), (102, 170, 93): (64, 104, 168)}, (0, 160, W, H))
+    stripe = lambda x, y: (176, 208, 160) if (x // 16) % 2 == 0 else (160, 196, 148)
+    recolor(img, {(166, 133, 143): stripe, (205, 187, 171): (232, 220, 188)}, (0, 0, W, 160))
+    d = ImageDraw.Draw(img)
+    # two paintings: a giraffe and the sea
+    for px0, sky, ground in ((204, (152, 208, 248), (120, 184, 88)), (700, (248, 216, 160), (96, 160, 216))):
+        d.rectangle((px0, 52, px0 + 64, 104), fill=PAL['k'])
+        d.rectangle((px0 + 4, 56, px0 + 60, 100), fill=(200, 152, 40))
+        d.rectangle((px0 + 8, 60, px0 + 56, 96), fill=sky)
+        d.rectangle((px0 + 8, 84, px0 + 56, 96), fill=ground)
+    # a small giraffe in the first painting
+    g = (232, 176, 72)
+    d.rectangle((228, 76, 244, 84), fill=g)
+    d.rectangle((240, 62, 244, 78), fill=g)
+    d.rectangle((240, 60, 250, 64), fill=g)
+    d.rectangle((230, 84, 232, 92), fill=g)
+    d.rectangle((240, 84, 242, 92), fill=g)
+    d.point((234, 79), fill=(152, 104, 64))
+    d.point((238, 81), fill=(152, 104, 64))
+    # a sun in the second painting
+    d.ellipse((708, 62, 724, 78), fill=PAL['y'])
+    img.save(OUT + 'papa-interior.png')
+
+
 if __name__ == '__main__':
     make_secret_house()
     make_item_icons()
@@ -495,4 +581,6 @@ if __name__ == '__main__':
     make_cards()
     make_water()
     make_classroom()
+    make_shop_interior()
+    make_papa_interior()
     print('ok')

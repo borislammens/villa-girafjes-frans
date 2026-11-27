@@ -112,22 +112,29 @@ export function currentChapterIndex(flags) {
   return idx;
 }
 
+/** stars ever earned that give the key to the school */
+export const KEY_STARS = 500;
+
 /**
  * Text for the quest box on screen.
  * @param {Set<string>} flags
+ * @param {number} [chapterStars]
+ * @param {{earned: number, has: boolean}} [key]
  * @returns {string}
  */
-export function questText(flags, chapterStars = 0) {
+export function questText(flags, chapterStars = 0, key = undefined) {
   const idx = currentChapterIndex(flags);
   if (idx < 0) return '';
-  if (idx >= CHAPTERS.length) return '🏆 Verhaal uitgespeeld!\nExtra: versla de grote woordjesdief in het noorden.';
+  // the key to the school: a long-term goal for all stars ever earned
+  const keyLine = key && !key.has ? `\n🔑 Sleutel tot de school: ⭐ ${Math.min(key.earned, KEY_STARS)}/${KEY_STARS}` : '';
+  if (idx >= CHAPTERS.length) return `🏆 Verhaal uitgespeeld!\nExtra: versla de grote woordjesdief in het noorden.${keyLine}`;
   const ch = CHAPTERS[idx];
   const lines = ch.goals.map((g) => `${flags.has(g.flag) ? '✔' : '○'} ${g.text}`);
   if (idx < CHAPTERS.length - 1) {
     const n = Math.min(chapterStars, STARS_PER_CHAPTER);
     lines.push(`${n >= STARS_PER_CHAPTER ? '✔' : '○'} Verdien ${STARS_PER_CHAPTER} sterren: ⭐ ${n}/${STARS_PER_CHAPTER} (menu > KERMIS)`);
   }
-  return `📖 ${ch.title}\n${lines.join('\n')}`;
+  return `📖 ${ch.title}\n${lines.join('\n')}${keyLine}`;
 }
 
 /**

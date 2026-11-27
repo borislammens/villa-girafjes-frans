@@ -194,7 +194,8 @@ export class PreloadScene extends BaseScene {
     );
     this.load.image(
       BUILDING_ASSET_KEYS.BUILDING_2_BACKGROUND,
-      `${monsterTamerAssetPath}/map/buildings/building_2_level_background.png`
+      // the shop of Madame Dupont, made from the original room (tools/make_villa_art.py)
+      'assets/images/villa/shop-interior.png'
     );
     this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_3_LEVEL, `assets/data/building_3.json`);
     this.load.image(
@@ -203,7 +204,8 @@ export class PreloadScene extends BaseScene {
     );
     this.load.image(
       BUILDING_ASSET_KEYS.BUILDING_3_BACKGROUND,
-      `${monsterTamerAssetPath}/map/buildings/building_3_level_background.png`
+      // the house of papa in the town, made from the original room (tools/make_villa_art.py)
+      'assets/images/villa/papa-interior.png'
     );
     this.load.tilemapTiledJSON(BUILDING_ASSET_KEYS.BUILDING_2_LEVEL, `assets/data/building_2.json`);
 
